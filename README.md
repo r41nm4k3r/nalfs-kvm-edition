@@ -11,7 +11,7 @@ The goal of this project is to substitute the alfs project which is outdated.
 
 This project is heavily based on lfs-kvm project by @fedorenchik so pay him a visit @ github.He has some very interesting projects.
 
-                   ## BIG THANKS ! ! !
+## **BIG THANKS** ! ! !
 
 ## Features
 
@@ -34,12 +34,13 @@ This project is heavily based on lfs-kvm project by @fedorenchik so pay him a vi
 * First run 02-version-check.sh and confirm all software with the book.
 * Then run lfs-kvm.sh to make lfs qcow2 image.
 
-```
-If for some reason the sript stops, you can resume by running again the main script followed by the chapter.
-./lfs-builder.sh [start-chapter]
-```
-`start-chapter` - from which chapter (to continue) building
 
+If for some reason the sript stops, you can resume by running again the main script followed by the chapter.
+
+`./lfs-kvm.sh` [start-chapter]
+```
+start-chapter - from which chapter (to continue) building
+```
 ### How to choose init system:
 
 Modify variable KVM_LFS_INIT in lfs-kvm.sh.
@@ -60,9 +61,9 @@ sysvinit
 
 You can safely delete the user,group and lfs directory when the script finish:
 
- - Sudo userdel lfs
- - Sudo groupdel lfs
- - Sudo rm -rf /mnt/lfs
+ - ` Sudo userdel lfs`
+ - ` Sudo groupdel lfs`
+ - ` Sudo rm -rf /mnt/lfs`
 
 ### Temporary:
 
