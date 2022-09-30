@@ -4,7 +4,14 @@
 
 Create qcow2 image for KVM (QEMU) of LFS 11.1 x86_64 systemd or sysvinit.
 
-The goal of this script is to substitute the alfs procedure.
+The goal of this project is to substitute the alfs project which is outdated.
+
+
+## Important
+
+This project is heavily based on lfs-kvm project by @fedorenchik so pay him a visit @ github.He has some very interesting projects.
+
+BIG THANKS ! ! !
 
 ## Features
 
@@ -28,7 +35,7 @@ The goal of this script is to substitute the alfs procedure.
 * Then run lfs-kvm.sh to make lfs qcow2 image.
 
 ```
-If for some reason the sript stop
+If for some reason the sript stops, you can resume by running again the main script followed by the chapter.
 ./lfs-builder.sh [start-chapter]
 ```
 `start-chapter` - from which chapter (to continue) building
@@ -50,6 +57,12 @@ sysvinit
 * Creates lfs user
 * Creates lfs group
 * Creates `/mnt/lfs` directory
+
+You can safely delete the user,group and lfs directory when the script finish:
+
+ - Sudo userdel lfs
+ - Sudo groupdel lfs
+ - Sudo rm -rf /mnt/lfs
 
 ### Temporary:
 

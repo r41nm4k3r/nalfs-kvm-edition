@@ -96,7 +96,7 @@ case "$KVM_LFS_CONTINUE" in
 	$LFS_TGT-gcc dummy.c
 	readelf -l a.out | grep '/ld-linux' | grep -F '[Requesting program interpreter: /lib64/ld-linux-x86-64.so.2]'
 	rm -v dummy.c a.out
-	$LFS/tools/libexec/gcc/$LFS_TGT/10.2.0/install-tools/mkheaders
+	$LFS/tools/libexec/gcc/$LFS_TGT/11.2.0/install-tools/mkheaders
 	cd ../..
 	rm -rf glibc-2.35
 ;&
