@@ -85,7 +85,7 @@ case "$KVM_LFS_CONTINUE" in
 				$LFS/lib64/ld-lsb-x86-64.so.3
 			;;
 	esac
-	patch -Np1 -i ../glibc-2.32-fhs-1.patch
+	patch -Np1 -i ../glibc-2.35-fhs-1.patch
 	mkdir -v build
 	cd build
 	../configure --prefix=/usr --host=$LFS_TGT --build=$(../scripts/config.guess) \

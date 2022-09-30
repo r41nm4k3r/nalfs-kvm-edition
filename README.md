@@ -1,10 +1,10 @@
-# lfs-kvm
+# Nlfs Kvm Edition
 
 ## Description
 
 Create qcow2 image for KVM (QEMU) of LFS 11.1 x86_64 systemd or sysvinit.
 
-The scripts mimics the LFS 11.1 book as close as possible.
+The goal of this script is to substitute the alfs procedure.
 
 ## Features
 
@@ -17,6 +17,9 @@ The scripts mimics the LFS 11.1 book as close as possible.
 ## Prerequisites
 
 * Linux
+    - Debian 11 (tested and working)
+    - Red Hat 8.6 (tested and working)
+    - Arch Linux (tested partialy and working)
 * QEMU
 
 ## Usage
@@ -25,7 +28,7 @@ The scripts mimics the LFS 11.1 book as close as possible.
 * Then run lfs-kvm.sh to make lfs qcow2 image.
 
 ```
-02-version-check.sh
+If for some reason the sript stop
 ./lfs-builder.sh [start-chapter]
 ```
 `start-chapter` - from which chapter (to continue) building
