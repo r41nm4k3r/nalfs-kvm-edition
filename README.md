@@ -11,7 +11,7 @@ The goal of this project is to substitute the alfs project which is outdated.
 
 This project is heavily based on lfs-kvm project by @fedorenchik so pay him a visit @ github.He has some very interesting projects.
 
-BIG THANKS ! ! !
+                   ## BIG THANKS ! ! !
 
 ## Features
 
