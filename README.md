@@ -24,9 +24,9 @@ This project is heavily based on lfs-kvm project by @fedorenchik so pay him a vi
 ## Prerequisites
 
 * Linux
-    - Debian 11 (tested and working)
-    - Red Hat 8.6 (tested and working)
-    - Arch Linux (tested partialy and working)
+    - Debian 11 (systemd tested and working 100%)
+    - Red Hat 8.6 (systemd tested and working 100%)
+    - Arch Linux (systemd tested partialy and working)
 * QEMU
 
 ## Usage
