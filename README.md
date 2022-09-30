@@ -62,6 +62,3 @@ During build:
 * Uses shell scripts directly (ALFS extracts build instructions from LFS
     sources)
 
-## Contributing
-
-Send PR or open an issue.
