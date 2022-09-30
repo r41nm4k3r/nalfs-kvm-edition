@@ -65,7 +65,7 @@ case "$KVM_LFS_CONTINUE" in
 "6.5")
 	### 6.5. Coreutils-9.0
 	tar -xf coreutils-9.0.tar.xz
-	cd coreutils-8.32
+	cd coreutils-9.0
 	./configure --prefix=/usr --host=$LFS_TGT --build=$(build-aux/config.guess) \
 		--enable-install-program=hostname \
 		--enable-no-install-program=kill,uptime
