@@ -98,8 +98,16 @@ case "$KVM_LFS_CONTINUE" in
 	### 6.7. File-5.41
 	tar -xf file-5.41.tar.gz
 	cd file-5.41
-	./configure --prefix=/usr --host=$LFS_TGT
-	make
+	mkdir build
+	pushd build
+  	  ../configure --disable-bzlib      \
+      		       --disable-libseccomp \
+                   --disable-xzlib      \
+                   --disable-zlib
+      make
+    popd
+	./configure --prefix=/usr --host=$LFS_TGT --build=$(./config.guess)
+	make FILE_COMPILE=$(pwd)/build/src/file
 	make DESTDIR=$LFS install
 	cd ..
 	rm -rf file-5.41
