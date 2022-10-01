@@ -37,7 +37,7 @@ case "$KVM_LFS_CONTINUE" in
 	mv -v mpc-1.2.1 mpc
 	case $(uname -m) in
 		x86_64)
-			sed -e '/m64=/s/lib64/lib/' -i.orig gcc/config/i386/t-linux
+			sed -e '/m64=/s/lib64/lib/' -i.orig gcc/config/i386/t-linux64
 			;;
 	esac
 	mkdir -v build
@@ -101,10 +101,12 @@ case "$KVM_LFS_CONTINUE" in
 	patch -Np1 -i ../glibc-2.35-fhs-1.patch
 	mkdir -v build
 	cd build
+	echo "rootsbindir=/usr/sbin" > configparms
 	../configure --prefix=/usr --host=$LFS_TGT --build=$(../scripts/config.guess) \
-		--enable-kernel=3.2 --with-headers=$LFS/usr/include libc_cv_slibdir=/lib
+		--enable-kernel=3.2 --with-headers=$LFS/usr/include libc_cv_slibdir=/usr/lib
 	make
 	make DESTDIR=$LFS install
+	sed '/RTLDLIST=/s@/usr@@g' -i $LFS/usr/bin/ldd
 	echo 'int main(){}' > dummy.c
 	$LFS_TGT-gcc dummy.c
 	readelf -l a.out | grep '/ld-linux' | grep -F '[Requesting program interpreter: /lib64/ld-linux-x86-64.so.2]'
@@ -122,7 +124,7 @@ case "$KVM_LFS_CONTINUE" in
 	cd build
 	../libstdc++-v3/configure --host=$LFS_TGT --build=$(../config.guess) \
 		--prefix=/usr --disable-multilib --disable-nls --disable-libstdcxx-pch \
-		--with-gxx-include-dir=/tools/$LFS_TGT/include/c++/10.2.0
+		--with-gxx-include-dir=/tools/$LFS_TGT/include/c++/11.2.0
 	make
 	make DESTDIR=$LFS install
 	cd ../..

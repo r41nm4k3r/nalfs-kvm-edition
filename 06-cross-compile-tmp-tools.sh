@@ -15,8 +15,6 @@ case "$KVM_LFS_CONTINUE" in
 	### 6.2. M4-1.4.19
 	tar -xf m4-1.4.19.tar.xz
 	cd m4-1.4.19
-	sed -i 's/IO_ftrylockfile/IO_EOF_SEEN/' lib/*.c
-	echo "#define _IO_IN_BACKUP 0x100" >> lib/stdio-impl.h
 	./configure --prefix=/usr --host=$LFS_TGT --build=$(build-aux/config.guess)
 	make
 	make DESTDIR=$LFS install
@@ -35,15 +33,19 @@ case "$KVM_LFS_CONTINUE" in
 	make -C include
 	make -C progs tic
 	popd
-	./configure --prefix=/usr --host=$LFS_TGT --build=$(./config.guess) \
-		--mandir=/usr/share/man --with-manpage-format=normal --with-shared \
-		--without-debug --without-ada --without-normal --enable-widec
+	./configure --prefix=/usr \
+				--host=$LFS_TGT \
+				--build=$(./config.guess) \
+				--mandir=/usr/share/man \
+				--with-manpage-format=normal \
+				--with-shared \
+				--without-debug \
+				--without-ada \
+				--without-normal \
+				--enable-widec
 	make
 	make DESTDIR=$LFS TIC_PATH=$(pwd)/build/progs/tic install
 	echo "INPUT(-lncursesw)" > $LFS/usr/lib/libncurses.so
-	mv -v $LFS/usr/lib/libncursesw.so.6* $LFS/lib
-	ln -sfv ../../lib/$(readlink $LFS/usr/lib/libncursesw.so) \
-		$LFS/usr/lib/libncursesw.so
 	cd ..
 	rm -rf ncurses-6.3
 ;&
@@ -56,7 +58,6 @@ case "$KVM_LFS_CONTINUE" in
 		--without-bash-malloc
 	make
 	make DESTDIR=$LFS install
-	mv $LFS/usr/bin/bash $LFS/bin/bash
 	ln -sv bash $LFS/bin/sh
 	cd ..
 	rm -rf bash-5.1.16
@@ -66,19 +67,17 @@ case "$KVM_LFS_CONTINUE" in
 	### 6.5. Coreutils-9.0
 	tar -xf coreutils-9.0.tar.xz
 	cd coreutils-9.0
-	./configure --prefix=/usr --host=$LFS_TGT --build=$(build-aux/config.guess) \
-		--enable-install-program=hostname \
-		--enable-no-install-program=kill,uptime
+	./configure --prefix=/usr                     \
+            --host=$LFS_TGT                   \
+            --build=$(build-aux/config.guess) \
+            --enable-install-program=hostname \
+            --enable-no-install-program=kill,uptime
 	make
 	make DESTDIR=$LFS install
-	mv -v $LFS/usr/bin/{cat,chgrp,chmod,chown,cp,date,dd,df,echo} $LFS/bin
-	mv -v $LFS/usr/bin/{false,ln,ls,mkdir,mknod,mv,pwd,rm} $LFS/bin
-	mv -v $LFS/usr/bin/{rmdir,stty,sync,true,uname} $LFS/bin
-	mv -v $LFS/usr/bin/{head,nice,sleep,touch} $LFS/bin
-	mv -v $LFS/usr/bin/chroot $LFS/usr/sbin
-	mkdir -pv $LFS/usr/share/man/man8
-	mv -v $LFS/usr/share/man/man1/chroot.1 $LFS/usr/share/man/man8/chroot.8
-	sed -i 's/"1"/"8"/' $LFS/usr/share/man/man8/chroot.8
+	mv -v $LFS/usr/bin/chroot              $LFS/usr/sbin
+    mkdir -pv $LFS/usr/share/man/man8
+    mv -v $LFS/usr/share/man/man1/chroot.1 $LFS/usr/share/man/man8/chroot.8
+    sed -i 's/"1"/"8"/'                    $LFS/usr/share/man/man8/chroot.8
 	cd ..
 	rm -rf coreutils-9.0
 ;&
@@ -117,11 +116,12 @@ case "$KVM_LFS_CONTINUE" in
 	### 6.8. Findutils-4.9.0
 	tar -xf findutils-4.9.0.tar.xz
 	cd findutils-4.9.0
-	./configure --prefix=/usr --host=$LFS_TGT --build=$(build-aux/config.guess)
+	./configure --prefix=/usr                   \
+    	        --localstatedir=/var/lib/locate \
+        	    --host=$LFS_TGT                 \
+            	--build=$(build-aux/config.guess)
 	make
 	make DESTDIR=$LFS install
-	mv -v $LFS/usr/bin/find $LFS/bin
-	sed -i 's|find:=${BINDIR}|find:=/bin|' $LFS/usr/bin/updatedb
 	cd ..
 	rm -rf findutils-4.9.0
 ;&
@@ -131,7 +131,9 @@ case "$KVM_LFS_CONTINUE" in
 	tar -xf gawk-5.1.1.tar.xz
 	cd gawk-5.1.1
 	sed -i 's/extras//' Makefile.in
-	./configure --prefix=/usr --host=$LFS_TGT --build=$(./config.guess)
+	./configure --prefix=/usr   \
+            --host=$LFS_TGT \
+            --build=$(build-aux/config.guess)
 	make
 	make DESTDIR=$LFS install
 	cd ..
@@ -142,7 +144,7 @@ case "$KVM_LFS_CONTINUE" in
 	### 6.10. Grep-3.7
 	tar -xf grep-3.7.tar.xz
 	cd grep-3.7
-	./configure --prefix=/usr --host=$LFS_TGT --bindir=/bin
+	./configure --prefix=/usr --host=$LFS_TGT
 	make
 	make DESTDIR=$LFS install
 	cd ..
@@ -156,7 +158,6 @@ case "$KVM_LFS_CONTINUE" in
 	./configure --prefix=/usr --host=$LFS_TGT
 	make
 	make DESTDIR=$LFS install
-	mv -v $LFS/usr/bin/gzip $LFS/bin
 	cd ..
 	rm -rf gzip-1.11
 ;&
@@ -188,7 +189,7 @@ case "$KVM_LFS_CONTINUE" in
 	### 6.14. Sed-4.8
 	tar -xf sed-4.8.tar.xz
 	cd sed-4.8
-	./configure --prefix=/usr --host=$LFS_TGT --bindir=/bin
+	./configure --prefix=/usr --host=$LFS_TGT
 	make
 	make DESTDIR=$LFS install
 	cd ..
@@ -199,8 +200,7 @@ case "$KVM_LFS_CONTINUE" in
 	### 6.15. Tar-1.34
 	tar -xf tar-1.34.tar.xz
 	cd tar-1.34
-	./configure --prefix=/usr --host=$LFS_TGT --build=$(build-aux/config.guess) \
-		--bindir=/bin
+	./configure --prefix=/usr --host=$LFS_TGT --build=$(build-aux/config.guess)
 	make
 	make DESTDIR=$LFS install
 	cd ..
@@ -215,9 +215,6 @@ case "$KVM_LFS_CONTINUE" in
 		--disable-static --docdir=/usr/share/doc/xz-5.2.5
 	make
 	make DESTDIR=$LFS install
-	mv -v $LFS/usr/bin/{lzma,unlzma,lzcat,xz,unxz,xzcat} $LFS/bin
-	mv -v $LFS/usr/lib/liblzma.so.* $LFS/lib
-	ln -svf ../../lib/$(readlink $LFS/usr/lib/liblzma.so) $LFS/usr/lib/liblzma.so
 	cd ..
 	rm -rf xz-5.2.5
 ;&
@@ -226,10 +223,17 @@ case "$KVM_LFS_CONTINUE" in
 	### 6.17. Binutils-2.38 - Pass 2
 	tar -xf binutils-2.38.tar.xz
 	cd binutils-2.38
+	sed '6009s/$add_dir//' -i ltmain.sh
 	mkdir -v build
 	cd build
-	../configure --prefix=/usr --build=$(../config.guess) --host=$LFS_TGT \
-		--disable-nls --enable-shared --disable-werror --enable-64-bit-bfd
+	../configure                   \
+    	--prefix=/usr              \
+    	--build=$(../config.guess) \
+    	--host=$LFS_TGT            \
+    	--disable-nls              \
+    	--enable-shared            \
+    	--disable-werror           \
+    	--enable-64-bit-bfd
 	make
 	make DESTDIR=$LFS install
 	cd ../..
@@ -248,9 +252,9 @@ case "$KVM_LFS_CONTINUE" in
 	tar -xf ../mpc-1.2.1.tar.gz
 	mv -v mpc-1.2.1 mpc
 	case $(uname -m) in
-	  		x86_64)
-    				sed -e '/m64=/s/lib64/lib/' -i.orig gcc/config/i386/t-linux64
-  	  				;;
+  	  x86_64)
+    	sed -e '/m64=/s/lib64/lib/' -i.orig gcc/config/i386/t-linux64
+  	  ;;
 	esac
 	mkdir -v build
 	cd build
@@ -276,8 +280,6 @@ case "$KVM_LFS_CONTINUE" in
 	make
 	make DESTDIR=$LFS install
 	ln -sv gcc $LFS/usr/bin/cc
-#	ln -sv ../lib64/libgcc_s.so $LFS/usr/lib/libgcc_s.so
-#	ln -sv ../lib64/libgcc_s.so.1 $LFS/usr/lib/libgcc_s.so.1
 	cd ../..
 	rm -rf gcc-11.2.0
 	echo "SUCCESS - 6"
