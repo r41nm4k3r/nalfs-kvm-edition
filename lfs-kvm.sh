@@ -86,9 +86,14 @@ case "$KVM_LFS_CONTINUE" in
 
 "4.2")
 	# create directory layout
-	sudo mkdir -pv $LFS/{bin,etc,lib,sbin,usr,var}
+	mkdir -pv $LFS/{etc,var} $LFS/usr/{bin,lib,sbin}
+
+	for i in bin lib sbin; do
+  	  ln -sv usr/$i $LFS/$i
+	done
+
 	case $(uname -m) in
-		x86_64) sudo mkdir -pv $LFS/lib64 ;;
+  	  x86_64) mkdir -pv $LFS/lib64 ;;
 	esac
 	sudo mkdir -pv $LFS/tools
 ;&
@@ -100,9 +105,9 @@ case "$KVM_LFS_CONTINUE" in
 		useradd -s /bin/bash -g lfs -m -k /dev/null lfs
 		echo "lfs:lfs" | chpasswd
 	fi
-	sudo chown -v lfs $LFS/{usr,lib,var,etc,bin,sbin,tools}
+	sudo chown -v lfs $LFS/{usr{,/*},lib,var,etc,bin,sbin,tools}
 	case $(uname -m) in
-		x86_64) sudo chown -v lfs $LFS/lib64 ;;
+		x86_64) chown -v lfs $LFS/lib64 ;;
 	esac
 	sudo chown -v lfs $LFS/sources
 ;&
@@ -146,9 +151,7 @@ EOF' lfs
 	### 7.2. Changing Ownership
 	sudo chown -R root:root $LFS/{usr,lib,var,etc,bin,sbin,tools}
 	case $(uname -m) in
-		x86_64)
-			sudo chown -R root:root $LFS/lib64
-			;;
+		x86_64) sudo chown -R root:root $LFS/lib64 ;;
 	esac
 ;&
 
