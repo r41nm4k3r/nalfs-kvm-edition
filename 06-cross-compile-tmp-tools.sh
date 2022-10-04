@@ -282,6 +282,7 @@ case "$KVM_LFS_CONTINUE" in
 	ln -sv gcc $LFS/usr/bin/cc
 	cd ../..
 	rm -rf gcc-11.2.0
-	echo "SUCCESS - 6"
+	echo "gcc pass 2 completed" >> pack.log
+	echo "SUCCESS - 6" >> lfs.log
 ;&
 esac

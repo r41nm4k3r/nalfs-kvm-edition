@@ -757,7 +757,7 @@ fi
 "8.78")
 	### 8.78. Cleaning Up
 	rm -rf /tmp/*
-	echo "SUCCESS - 8.2"
+	echo "SUCCESS - 8.2" >> lfs.log
 	logout
 ;&
 esac

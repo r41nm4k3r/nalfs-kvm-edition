@@ -129,6 +129,7 @@ case "$KVM_LFS_CONTINUE" in
 	make DESTDIR=$LFS install
 	cd ../..
 	rm -rf gcc-11.2.0
-	echo "SUCCESS - 5"
+	echo "gcc pass 1 completed" >> pack.log
+	echo "SUCCESS - 5" >> lfs.log
 ;&
 esac

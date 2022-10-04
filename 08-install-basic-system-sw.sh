@@ -642,7 +642,7 @@ PATH=$PATH make tests < $CURRENT_TTY
 EOF
 	make install
 	mv -vf /usr/bin/bash /bin
-	echo "SUCCESS - 8.1"
+	echo "SUCCESS - 8.1" >> lfs.log
 	exit
 ;&
 esac
