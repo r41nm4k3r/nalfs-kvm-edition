@@ -96,5 +96,5 @@ EOF
 echo 'tester:x:1000:101::/home/tester:/bin/bash' >> /etc/passwd
 echo 'tester:x:101:' >> /etc/group
 install -o tester -d /home/tester
-echo "SUCCESS - 7.1" >> lfs.log
+echo "SUCCESS - 7.1"
 logout

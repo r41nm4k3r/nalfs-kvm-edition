@@ -125,7 +125,6 @@ case "$KVM_LFS_CONTINUE" in
 	cd ..
 	rm -rf findutils-4.9.0
 ;&
-
 "6.9")
 	### 6.9 Gawk-5.1.1
 	tar -xf gawk-5.1.1.tar.xz
@@ -282,7 +281,7 @@ case "$KVM_LFS_CONTINUE" in
 	ln -sv gcc $LFS/usr/bin/cc
 	cd ../..
 	rm -rf gcc-11.2.0
-	echo "gcc pass 2 completed" >> pack.log
-	echo "SUCCESS - 6" >> lfs.log
+	echo "SUCCESS - 6"
 ;&
 esac
+

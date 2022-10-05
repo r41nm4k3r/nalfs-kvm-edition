@@ -93,5 +93,5 @@ rm -rf util-linux-2.37.4
 ### 7.14. Cleaning up and Saving the Temporary System
 find /usr/{lib,libexec} -name \*.la -delete
 rm -rf /usr/share/{info,man,doc}/*
-echo "SUCCESS - 7.2" >> lfs.log
+echo "SUCCESS - 7.2"
 exit

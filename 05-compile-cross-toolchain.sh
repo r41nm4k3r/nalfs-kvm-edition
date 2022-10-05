@@ -43,25 +43,25 @@ case "$KVM_LFS_CONTINUE" in
 	mkdir -v build
 	cd build
 	../configure                  \
-    	--target=$LFS_TGT         \
-    	--prefix=$LFS/tools       \
-    	--with-glibc-version=2.35 \
-    	--with-sysroot=$LFS       \
-    	--with-newlib             \
-    	--without-headers         \
-    	--enable-initfini-array   \
-    	--disable-nls             \
-    	--disable-shared          \
-    	--disable-multilib        \
-    	--disable-decimal-float   \
-    	--disable-threads         \
-    	--disable-libatomic       \
-    	--disable-libgomp         \
-    	--disable-libquadmath     \
-    	--disable-libssp          \
-    	--disable-libvtv          \
-    	--disable-libstdcxx       \
-    	--enable-languages=c,c++
+    		--target=$LFS_TGT         \
+    		--prefix=$LFS/tools       \
+    		--with-glibc-version=2.35 \
+    		--with-sysroot=$LFS       \
+    		--with-newlib             \
+    		--without-headers         \
+    		--enable-initfini-array   \
+    		--disable-nls             \
+    		--disable-shared          \
+    		--disable-multilib        \
+    		--disable-decimal-float   \
+    		--disable-threads         \
+    		--disable-libatomic       \
+    		--disable-libgomp         \
+    		--disable-libquadmath     \
+    		--disable-libssp          \
+    		--disable-libvtv          \
+    		--disable-libstdcxx       \
+    		--enable-languages=c,c++
 	make
 	make install
 	cd ..
@@ -129,7 +129,6 @@ case "$KVM_LFS_CONTINUE" in
 	make DESTDIR=$LFS install
 	cd ../..
 	rm -rf gcc-11.2.0
-	echo "gcc pass 1 completed" >> pack.log
-	echo "SUCCESS - 5" >> lfs.log
+	echo "SUCCESS - 5"
 ;&
 esac

@@ -239,7 +239,7 @@ make kernelversion
 make kernelrelease
 make
 make modules_install
-cp -iv arch/x86/boot/bzImage /boot/vmlinuz-5.16.9-lfs-11.1-systemd
+cp -iv arch/x86_64/boot/bzImage /boot/vmlinuz-5.16.9-lfs-11.1-systemd
 cp -iv System.map /boot/System.map-5.16.9
 cp -iv .config /boot/config-5.16.9
 install -d /usr/share/doc/linux-5.16.9
@@ -264,8 +264,8 @@ set timeout=5
 insmod ext2
 set root=(hd0,gpt1)
 
-menuentry "GNU/Linux, Linux 5.16.9-lfs-10.0" {
-        linux   /boot/vmlinuz-5.16.9-lfs-10.0 loglevel=7 root=/dev/vda1 ro
+menuentry "GNU/Linux, Linux 5.16.9-lfs-11.1" {
+        linux   /boot/vmlinuz-5.16.9-lfs-11.1 loglevel=7 root=/dev/vda1 ro
 }
 EOF
 

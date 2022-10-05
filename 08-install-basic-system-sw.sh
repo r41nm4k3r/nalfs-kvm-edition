@@ -68,12 +68,14 @@ case "$KVM_LFS_CONTINUE" in
 	### 8.6. DejaGNU-1.6.3
 	tar -xf dejagnu-1.6.3.tar.gz
 	cd dejagnu-1.6.3
+	mkdir -v build
+	cd build
 	./configure --prefix=/usr
 	makeinfo --html --no-split -o doc/dejagnu.html doc/dejagnu.texi
 	makeinfo --plaintext -o doc/dejagnu.txt doc/dejagnu.texi
 	make install
-	install -v -dm755 /usr/share/doc/dejagnu-1.6.3
-	install -v -m644 doc/dejagnu.{html,txt} /usr/share/doc/dejagnu-1.6.3
+	install -v -dm755  /usr/share/doc/dejagnu-1.6.3
+	install -v -m644   doc/dejagnu.{html,txt} /usr/share/doc/dejagnu-1.6.3
 	make check
 	cd ..
 	rm -rf dejagnu-1.6.3
@@ -97,11 +99,11 @@ case "$KVM_LFS_CONTINUE" in
 	cd build
 	echo "rootsbindir=/usr/sbin" > configparms
 	../configure --prefix=/usr                            \
-    	         --disable-werror                         \
+		     --disable-werror                         \
         	     --enable-kernel=3.2                      \
-            	 --enable-stack-protector=strong          \
-            	 --with-headers=/usr/include              \
-            	 libc_cv_slibdir=/usr/lib
+            	     --enable-stack-protector=strong          \
+            	     --with-headers=/usr/include              \
+            	     libc_cv_slibdir=/usr/lib
 	make
 	make check || true
 	touch /etc/ld.so.conf
@@ -151,7 +153,8 @@ case "$KVM_LFS_CONTINUE" in
 	localedef -i zh_HK -f BIG5-HKSCS zh_HK.BIG5-HKSCS
 	localedef -i zh_TW -f UTF-8 zh_TW.UTF-8
 	make localedata/install-locales
-	
+	localedef -i POSIX -f UTF-8 C.UTF-8 2> /dev/null || true
+	localedef -i ja_JP -f SHIFT_JIS ja_JP.SJIS 2> /dev/null || true
 	cat > /etc/nsswitch.conf << "EOF"
 	# Begin /etc/nsswitch.conf
 	
@@ -180,15 +183,14 @@ EOF
 	    zic -L leapseconds -d $ZONEINFO/right ${tz}
 	done
 	cp -v zone.tab zone1970.tab iso3166.tab $ZONEINFO
-	zic -d $ZONEINFO -p Greece/Athens
+	zic -d $ZONEINFO -p Europe/Athens
 	unset ZONEINFO
-	tzselect
-	ln -sfv /usr/share/zoneinfo/Greece/Athens /etc/localtime
+	ln -sfv /usr/share/zoneinfo/Europe/Athens /etc/localtime
 	cat > /etc/ld.so.conf << "EOF"
 	# Begin /etc/ld.so.conf
 	/usr/local/lib
 	/opt/lib
-	EOF
+EOF
 	cat >> /etc/ld.so.conf << "EOF"
 	# Add an include directory
 	include /etc/ld.so.conf.d/*.conf
@@ -197,6 +199,10 @@ EOF
 	mkdir -pv /etc/ld.so.conf.d
 	cd ../..
 	rm -rf glibc-2.35
+	cat >> glibc.log << "EOF"
+	finaly installed correctly
+EOF
+
 ;&
 
 "8.9")
@@ -207,8 +213,7 @@ EOF
 	make
 	make check
 	make install
-	mv -v /usr/lib/libz.so.* /lib
-	ln -sfv ../../lib/$(readlink /usr/lib/libz.so) /usr/lib/libz.so
+	rm -fv /usr/lib/libz.a
 	cd ..
 	rm -rf zlib-1.2.11
 ;&
@@ -224,12 +229,13 @@ EOF
 	make clean
 	make
 	make PREFIX=/usr install
-	cp -v bzip2-shared /bin/bzip2
-	cp -av libbz2.so* /lib
-	ln -sv ../../lib/libbz2.so.1.0 /usr/lib/libbz2.so
-	rm -v /usr/bin/{bunzip2,bzcat,bzip2}
-	ln -sv bzip2 /bin/bunzip2
-	ln -sv bzip2 /bin/bzcat
+	cp -av libbz2.so.* /usr/lib
+	ln -sv libbz2.so.1.0.8 /usr/lib/libbz2.so
+	cp -v bzip2-shared /usr/bin/bzip2
+	for i in /usr/bin/{bzcat,bunzip2}; do
+  	  ln -sfv bzip2 $i
+	done
+	rm -fv /usr/lib/libbz2.a
 	cd ..
 	rm -rf bzip2-1.0.8
 ;&
@@ -242,9 +248,6 @@ EOF
 	make
 	make check
 	make install
-	mv -v /usr/bin/{lzma,unlzma,lzcat,xz,unxz,xzcat} /bin
-	mv -v /usr/lib/liblzma.so.* /lib
-	ln -svf ../../lib/$(readlink /usr/lib/liblzma.so) /usr/lib/liblzma.so
 	cd ..
 	rm -rf xz-5.2.5
 ;&
@@ -256,8 +259,6 @@ EOF
 	make
 	make prefix=/usr install
 	rm -v /usr/lib/libzstd.a
-	mv -v /usr/lib/libzstd.so.* /lib
-	ln -sfv ../../lib/$(readlink /usr/lib/libzstd.so) /usr/lib/libzstd.so
 	cd ..
 	rm -rf zstd-1.5.2
 ;&
@@ -281,14 +282,10 @@ EOF
 	sed -i '/MV.*old/d' Makefile.in
 	sed -i '/{OLDSUFF}/c:' support/shlib-install
 	./configure --prefix=/usr --disable-static --with-curses \
-		--docdir=/usr/share/doc/readline-8.0
+		--docdir=/usr/share/doc/readline-8.1.2
 	make SHLIB_LIBS="-lncursesw"
 	make SHLIB_LIBS="-lncursesw" install
-	mv -v /usr/lib/lib{readline,history}.so.* /lib
-	chmod -v u+w /lib/lib{readline,history}.so.*
-	ln -sfv ../../lib/$(readlink /usr/lib/libreadline.so) /usr/lib/libreadline.so
-	ln -sfv ../../lib/$(readlink /usr/lib/libhistory.so) /usr/lib/libhistory.so
-	install -v -m644 doc/*.{ps,pdf,html,dvi} /usr/share/doc/readline-8.0
+	install -v -m644 doc/*.{ps,pdf,html,dvi} /usr/share/doc/readline-8.1.2
 	cd ..
 	rm -rf readline-8.1.2
 ;&
@@ -297,8 +294,6 @@ EOF
 	### 8.15. M4-1.4.19
 	tar -xf m4-1.4.19.tar.xz
 	cd m4-1.4.19
-	sed -i 's/IO_ftrylockfile/IO_EOF_SEEN/' lib/*.c
-	echo "#define _IO_IN_BACKUP 0x100" >> lib/stdio-impl.h
 	./configure --prefix=/usr
 	make
 	make check
@@ -311,7 +306,7 @@ EOF
 	### 8.16. Bc-5.2.2
 	tar -xf bc-5.2.2.tar.xz
 	cd bc-5.2.2
-	PREFIX=/usr CC=gcc CFLAGS="-std=c99" ./configure.sh -G -O3
+	CC=gcc ./configure --prefix=/usr -G -O3
 	make
 	make test
 	make install
@@ -323,7 +318,9 @@ EOF
 	### 8.17. Flex-2.6.4
 	tar -xf flex-2.6.4.tar.gz
 	cd flex-2.6.4
-	./configure --prefix=/usr --docdir=/usr/share/doc/flex-2.6.4
+	./configure --prefix=/usr \
+		    --docdir=/usr/share/doc/flex-2.6.4 \
+		    --disable-static
 	make
 	make check
 	make install
@@ -642,7 +639,8 @@ PATH=$PATH make tests < $CURRENT_TTY
 EOF
 	make install
 	mv -vf /usr/bin/bash /bin
-	echo "SUCCESS - 8.1" >> lfs.log
+	echo "SUCCESS - 8.1"
 	exit
 ;&
 esac
+
