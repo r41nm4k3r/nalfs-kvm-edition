@@ -54,8 +54,11 @@ case "$KVM_LFS_CONTINUE" in
 	### 8.5. Expect-5.45.4
 	tar -xf expect5.45.4.tar.gz
 	cd expect5.45.4
-	./configure --prefix=/usr --with-tcl=/usr/lib --enable-shared \
-		--mandir=/usr/share/man --with-tclinclude=/usr/include
+	./configure --prefix=/usr           \
+            --with-tcl=/usr/lib     \
+            --enable-shared         \
+            --mandir=/usr/share/man \
+            --with-tclinclude=/usr/include
 	make
 	make test
 	make install
@@ -70,9 +73,9 @@ case "$KVM_LFS_CONTINUE" in
 	cd dejagnu-1.6.3
 	mkdir -v build
 	cd build
-	./configure --prefix=/usr
-	makeinfo --html --no-split -o doc/dejagnu.html doc/dejagnu.texi
-	makeinfo --plaintext -o doc/dejagnu.txt doc/dejagnu.texi
+	../configure --prefix=/usr
+	makeinfo --html --no-split -o doc/dejagnu.html ../doc/dejagnu.texi
+	makeinfo --plaintext       -o doc/dejagnu.txt  ../doc/dejagnu.texi
 	make install
 	install -v -dm755  /usr/share/doc/dejagnu-1.6.3
 	install -v -m644   doc/dejagnu.{html,txt} /usr/share/doc/dejagnu-1.6.3
@@ -401,47 +404,39 @@ EOF
 		KVM_LFS_ATTR_CONFIGURE_BINDIR_ARG="--bindir=/bin"
 	fi
 	./configure --prefix=/usr $KVM_LFS_ATTR_CONFIGURE_BINDIR_ARG --disable-static \
-		--sysconfdir=/etc --docdir=/usr/share/doc/attr-2.4.48
+		--sysconfdir=/etc --docdir=/usr/share/doc/attr-2.5.1
 	make
 	make check
 	make install
-	mv -v /usr/lib/libattr.so.* /lib
-	ln -sfv ../../lib/$(readlink /usr/lib/libattr.so) /usr/lib/libattr.so
 	cd ..
 	rm -rf attr-2.5.1
 ;&
 
 "8.23")
 	### 8.23. Acl-2.3.1
-	tar -xf acl-2.3.1.tar.gz
+	tar -xf acl-2.3.1.tar.xz
 	cd acl-2.3.1
 	if [ "$KVM_LFS_INIT" == "sysvinit" ]; then
 		KVM_LFS_ACL_CONFIGURE_BINDIR_ARG="--bindir=/bin"
 	fi
 	./configure --prefix=/usr $KVM_LFS_ACL_CONFIGURE_BINDIR_ARG --disable-static \
-		--libexecdir=/usr/lib --docdir=/usr/share/doc/acl-2.3.1
+		    --docdir=/usr/share/doc/acl-2.3.1
 	make
 	make install
-	mv -v /usr/lib/libacl.so.* /lib
-	ln -sfv ../../lib/$(readlink /usr/lib/libacl.so) /usr/lib/libacl.so
 	cd ..
 	rm -rf acl-2.3.1
 ;&
 
 "8.24")
-	### 8.24 Libcap-3.8.2
-	tar -xf libcap-3.8.2.tar.xz
-	cd libcap-3.8.2
-	sed -i '/install -m.*STACAPLIBNAME/d' libcap/Makefile
-	make lib=lib
+	### 8.24 Libcap-2.63
+	tar -xf libcap-2.63.tar.xz
+	cd libcap-2.63
+	sed -i '/install -m.*STA/d' libcap/Makefile
+	make prefix=/usr lib=lib
 	make test
-	make lib=lib PKGCONFIGDIR=/usr/lib/pkgconfig install
-	chmod -v 755 /lib/libcap.so.3.8.2
-	mv -v /lib/libpsx.a /usr/lib
-	rm -v /lib/libcap.so
-	ln -sfv ../../lib/libcap.so.2 /usr/lib/libcap.so
+	make prefix=/usr lib=lib install
 	cd ..
-	rm -rf libcap-3.8.2
+	rm -rf libcap-2.63
 ;&
 
 "8.25")
@@ -449,19 +444,21 @@ EOF
 	tar -xf shadow-4.11.1.tar.xz
 	cd shadow-4.11.1
 	sed -i 's/groups$(EXEEXT) //' src/Makefile.in
-	find man -name Makefile.in -exec sed -i 's/groups\.1 / /' {} \;
+	find man -name Makefile.in -exec sed -i 's/groups\.1 / /'   {} \;
 	find man -name Makefile.in -exec sed -i 's/getspnam\.3 / /' {} \;
-	find man -name Makefile.in -exec sed -i 's/passwd\.5 / /' {} \;
-	sed -e 's:#ENCRYPT_METHOD DES:ENCRYPT_METHOD SHA512:' \
-		-e 's:/var/spool/mail:/var/mail:' -i etc/login.defs
-	sed -i 's/1000/999/' etc/useradd
+	find man -name Makefile.in -exec sed -i 's/passwd\.5 / /'   {} \;
 	touch /usr/bin/passwd
-	./configure --sysconfdir=/etc --with-group-name-max-length=32
+	./configure --sysconfdir=/etc \
+        	    --disable-static  \
+       		    --with-group-name-max-length=32
 	make
-	make install
+	make exec_prefix=/usr install
+	make -C man install-man
 	pwconv
 	grpconv
-	sed -i 's/yes/no/' /etc/default/useradd
+	mkdir -p /etc/default
+	useradd -D --gid 999
+	sed -i '/MAIL/s/yes/no/' /etc/default/useradd
 	echo "root:root" | chpasswd
 	cd ..
 	rm -rf shadow-4.11.1
@@ -472,8 +469,8 @@ EOF
 	tar -xf gcc-11.2.0.tar.xz
 	cd gcc-11.2.0
 	sed -e '/static.*SIGSTKSZ/d' \
-    -e 's/return kAltStackSize/return SIGSTKSZ * 4/' \
-    -i libsanitizer/sanitizer_common/sanitizer_posix_libcdep.cpp
+    	    -e 's/return kAltStackSize/return SIGSTKSZ * 4/' \
+    	    -i libsanitizer/sanitizer_common/sanitizer_posix_libcdep.cpp
 	case $(uname -m) in
 		x86_64)
 			sed -e '/m64=/s/lib64/lib/' -i.orig gcc/config/i386/t-linux64
@@ -482,14 +479,17 @@ EOF
 	[ -e build ] && rm -r build
 	mkdir -v build
 	cd build
-	../configure --prefix=/usr LD=ld --enable-languages=c,c++ --disable-multilib \
-		--disable-bootstrap --with-system-zlib
+	../configure --prefix=/usr \
+		     LD=ld \
+		     --enable-languages=c,c++ \
+		     --disable-multilib \
+		     --disable-bootstrap \
+		     --with-system-zlib
 	make
 	ulimit -s 32768
 	chown -Rv tester .
 	su tester -c "PATH=$PATH make -k check" || true
 	../contrib/test_summary
-	../contrib/test_summary | grep -A7 Summ
 	make install
 	rm -rf /usr/lib/gcc/$(gcc -dumpmachine)/11.2.0/include-fixed/bits/
 	chown -v -R root:root /usr/lib/gcc/*linux-gnu/11.2.0/include{,-fixed}
@@ -498,15 +498,7 @@ EOF
         /usr/lib/bfd-plugins/
 	echo 'int main(){}' > dummy.c
 	cc dummy.c -v -Wl,--verbose &> dummy.log
-	readelf -l a.out | grep ': /lib' | \
-		grep -F '[Requesting program interpreter: /lib64/ld-linux-x86-64.so.2]'
-	grep -o '/usr/lib.*/crt[1in].*succeeded' dummy.log | wc -l | grep -F '3'
-	grep -B4 '^ /usr/include' dummy.log | grep -F 'search starts here:'
-	grep 'SEARCH.*/usr/lib' dummy.log | sed 's|; |\n|g' | grep -F 'SEARCH_DIR'
-	grep "/lib.*/libc.so.6 " dummy.log | \
-		grep -F 'attempt to open /lib/libc.so.6 succeeded'
-	grep found dummy.log | \
-		grep -F 'found ld-linux-x86-64.so.2 at /lib/ld-linux-x86-64.so.2'
+	readelf -l a.out | grep ': /lib'
 	rm -v dummy.c a.out dummy.log
 	mkdir -pv /usr/share/gdb/auto-load/usr/lib
 	mv -v /usr/lib/*gdb.py /usr/share/gdb/auto-load/usr/lib
