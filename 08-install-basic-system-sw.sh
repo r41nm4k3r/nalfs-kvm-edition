@@ -523,30 +523,27 @@ EOF
 	### 8.28. Ncurses-6.3
 	tar -xf ncurses-6.3.tar.gz
 	cd ncurses-6.3
-	sed -i '/LIBTOOL_INSTALL/d' c++/Makefile.in
-	./configure --prefix=/usr --mandir=/usr/share/man --with-shared \
-		--without-debug --without-normal --enable-pc-files --enable-widec
+	./configure --prefix=/usr \
+				--mandir=/usr/share/man \
+				--with-shared \
+				--without-debug \
+				--without-normal \
+				--enable-pc-files \
+				--enable-widec \
+				--with-pkg-config-libdir=/usr/lib/pkgconfig
 	make
-	make install
-	mv -v /usr/lib/libncursesw.so.6* /lib
-	ln -sfv ../../lib/$(readlink /usr/lib/libncursesw.so) /usr/lib/libncursesw.so
+	make DESTDIR=$PWD/dest install
+	install -vm755 dest/usr/lib/libncursesw.so.6.3 /usr/lib
+	rm -v  dest/usr/lib/{libncursesw.so.6.3,libncurses++w.a}
+	cp -av dest/* /
 	for lib in ncurses form panel menu ; do
-		rm -vf /usr/lib/lib${lib}.so
-		echo "INPUT(-l${lib}w)" > /usr/lib/lib${lib}.so
-		ln -sfv ${lib}w.pc /usr/lib/pkgconfig/${lib}.pc
+    rm -vf                    /usr/lib/lib${lib}.so
+    echo "INPUT(-l${lib}w)" > /usr/lib/lib${lib}.so
+    ln -sfv ${lib}w.pc        /usr/lib/pkgconfig/${lib}.pc
 	done
-	rm -vf /usr/lib/libcursesw.so
+	rm -vf                     /usr/lib/libcursesw.so
 	echo "INPUT(-lncursesw)" > /usr/lib/libcursesw.so
-	ln -sfv libncurses.so /usr/lib/libcurses.so
-	mkdir -v /usr/share/doc/ncurses-6.3
-	cp -v -R doc/* /usr/share/doc/ncurses-6.3
-	if [ "$NEED_NON_WIDE_CHAR_SUPORT" == "true" ]; then
-		make distclean
-		./configure --prefix=/usr --with-shared --without-normal \
-			--without-debug --without-cxx-binding --with-abi-version=5
-		make sources libs
-		cp -av lib/lib*.so.5* /usr/lib
-	fi
+	ln -sfv libncurses.so      /usr/lib/libcurses.so
 	cd ..
 	rm -rf ncurses-6.3
 ;&
@@ -555,7 +552,7 @@ EOF
 	### 8.29. Sed-4.8
 	tar -xf sed-4.8.tar.xz
 	cd sed-4.8
-	./configure --prefix=/usr --bindir=/bin
+	./configure --prefix=/usr
 	make
 	make html
 	chown -Rv tester .
@@ -574,8 +571,6 @@ EOF
 	./configure --prefix=/usr
 	make
 	make install
-	mv -v /usr/bin/fuser /bin
-	mv -v /usr/bin/killall /bin
 	cd ..
 	rm -rf psmisc-23.7
 ;&
@@ -609,7 +604,7 @@ EOF
 	### 8.33. Grep-3.7
 	tar -xf grep-3.7.tar.xz
 	cd grep-3.7
-	./configure --prefix=/usr --bindir=/bin
+	./configure --prefix=/usr
 	make
 	make check
 	make install
@@ -626,11 +621,15 @@ EOF
 		--without-bash-malloc --with-installed-readline
 	make
 	chown -Rv tester .
-	su tester << EOF
-PATH=$PATH make tests < $CURRENT_TTY
+	su -s /usr/bin/expect tester << EOF
+		set timeout -1
+		spawn make tests
+		expect eof
+		lassign [wait] _ _ _ value
+		exit $value
 EOF
 	make install
-	mv -vf /usr/bin/bash /bin
+	exec /usr/bin/bash --login
 	echo "SUCCESS - 8.1"
 	exit
 ;&
