@@ -6,8 +6,28 @@ set -v
 source $HOME/.bashrc
 env
 echo $LFS
-cd $LFS
 cd $LFS/sources
+
+### Automate uncompress and clean up processes
+package_name=""
+package_ext=""
+
+begin() {
+	package_name=$1
+	package_ext=$2
+
+	echo "[lfs-cross] Starting build of $package_name at $(date)"
+
+	tar xf $package_name.$package_ext
+	cd $package_name
+}
+
+finish() {
+	echo "[lfs-cross] Finishing build of $package_name at $(date)"
+
+	cd $LFS/sources
+	rm -rf $package_name
+}
 
 case "$KVM_LFS_CONTINUE" in
 "6.2")
