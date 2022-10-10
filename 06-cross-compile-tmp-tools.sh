@@ -33,19 +33,18 @@ case "$KVM_LFS_CONTINUE" in
 "6.2")
 	### Chapter 6. Cross Compiling Temporary Tools
 	### 6.2. M4-1.4.19
-	tar -xf m4-1.4.19.tar.xz
-	cd m4-1.4.19
-	./configure --prefix=/usr --host=$LFS_TGT --build=$(build-aux/config.guess)
+	begin m4-1.4.19 tar.xz
+	./configure --prefix=/usr \
+				--host=$LFS_TGT \
+				--build=$(build-aux/config.guess)
 	make
 	make DESTDIR=$LFS install
-	cd ..
-	rm -rf m4-1.4.19
+	finish
 ;&
 
 "6.3")
 	### 6.3 Ncurses-6.3
-	tar -xf ncurses-6.3.tar.gz
-	cd ncurses-6.3
+	begin ncurses-6.3 tar.gz
 	sed -i s/mawk// configure
 	mkdir build
 	pushd build
@@ -53,40 +52,39 @@ case "$KVM_LFS_CONTINUE" in
 	make -C include
 	make -C progs tic
 	popd
-	./configure --prefix=/usr \
-				--host=$LFS_TGT \
-				--build=$(./config.guess) \
-				--mandir=/usr/share/man \
-				--with-manpage-format=normal \
-				--with-shared \
-				--without-debug \
-				--without-ada \
-				--without-normal \
-				--enable-widec
+	./configure --prefix=/usr                \
+            	--host=$LFS_TGT              \
+            	--build=$(./config.guess)    \
+            	--mandir=/usr/share/man      \
+            	--with-manpage-format=normal \
+            	--with-shared                \
+            	--without-normal             \
+            	--with-cxx-shared            \
+            	--without-debug              \
+            	--without-ada                \
+            	--disable-stripping          \
+            	--enable-widec
 	make
 	make DESTDIR=$LFS TIC_PATH=$(pwd)/build/progs/tic install
 	echo "INPUT(-lncursesw)" > $LFS/usr/lib/libncurses.so
-	cd ..
-	rm -rf ncurses-6.3
-;&
+	finish
 
 "6.4")
 	### 6.4 Bash-5.1.16
-	tar -xf bash-5.1.16.tar.gz
-	cd bash-5.1.16
-	./configure --prefix=/usr --build=$(support/config.guess) --host=$LFS_TGT \
-		--without-bash-malloc
+	begin bash-5.1.16 tar.gz
+	./configure --prefix=/usr \
+				--build=$(support/config.guess) \
+				--host=$LFS_TGT \
+				--without-bash-malloc
 	make
 	make DESTDIR=$LFS install
 	ln -sv bash $LFS/bin/sh
-	cd ..
-	rm -rf bash-5.1.16
+	finish
 ;&
 
 "6.5")
 	### 6.5. Coreutils-9.0
-	tar -xf coreutils-9.0.tar.xz
-	cd coreutils-9.0
+	begin coreutils-9.1 tar.xz
 	./configure --prefix=/usr                     \
             --host=$LFS_TGT                   \
             --build=$(build-aux/config.guess) \
@@ -95,113 +93,102 @@ case "$KVM_LFS_CONTINUE" in
 	make
 	make DESTDIR=$LFS install
 	mv -v $LFS/usr/bin/chroot              $LFS/usr/sbin
-    mkdir -pv $LFS/usr/share/man/man8
-    mv -v $LFS/usr/share/man/man1/chroot.1 $LFS/usr/share/man/man8/chroot.8
-    sed -i 's/"1"/"8"/'                    $LFS/usr/share/man/man8/chroot.8
-	cd ..
-	rm -rf coreutils-9.0
+	mkdir -pv $LFS/usr/share/man/man8
+	mv -v $LFS/usr/share/man/man1/chroot.1 $LFS/usr/share/man/man8/chroot.8
+	sed -i 's/"1"/"8"/'                    $LFS/usr/share/man/man8/chroot.8
+	finish
 ;&
 
 "6.6")
 	### 6.6. Diffutils-3.8
-	tar -xf diffutils-3.8.tar.xz
+	begin diffutils-3.8 tar.xz
 	cd diffutils-3.8
 	./configure --prefix=/usr --host=$LFS_TGT
 	make
 	make DESTDIR=$LFS install
-	cd ..
-	rm -rf diffutils-3.8
+	finish
 ;&
 
 "6.7")
-	### 6.7. File-5.41
-	tar -xf file-5.41.tar.gz
-	cd file-5.41
+	### 6.7. File-5.42
+	begin file-5.42 tar.gz
 	mkdir build
 	pushd build
-  	  ../configure --disable-bzlib      \
-      		       --disable-libseccomp \
-                   --disable-xzlib      \
-                   --disable-zlib
-      make
-    popd
+	  ../configure --disable-bzlib      \
+	               --disable-libseccomp \
+	               --disable-xzlib      \
+	               --disable-zlib
+	  make
+	popd
 	./configure --prefix=/usr --host=$LFS_TGT --build=$(./config.guess)
 	make FILE_COMPILE=$(pwd)/build/src/file
 	make DESTDIR=$LFS install
-	cd ..
-	rm -rf file-5.41
+	rm -v $LFS/usr/lib/libmagic.la
+	finish
 ;&
 
 "6.8")
 	### 6.8. Findutils-4.9.0
-	tar -xf findutils-4.9.0.tar.xz
-	cd findutils-4.9.0
+	begin findutils-4.9.0 tar.xz
 	./configure --prefix=/usr                   \
-    	        --localstatedir=/var/lib/locate \
-        	    --host=$LFS_TGT                 \
+            	--localstatedir=/var/lib/locate \
+            	--host=$LFS_TGT                 \
             	--build=$(build-aux/config.guess)
 	make
 	make DESTDIR=$LFS install
-	cd ..
-	rm -rf findutils-4.9.0
+	finish
 ;&
 "6.9")
 	### 6.9 Gawk-5.1.1
-	tar -xf gawk-5.1.1.tar.xz
-	cd gawk-5.1.1
+	begin gawk-5.1.1 tar.xz
 	sed -i 's/extras//' Makefile.in
 	./configure --prefix=/usr   \
             --host=$LFS_TGT \
             --build=$(build-aux/config.guess)
 	make
 	make DESTDIR=$LFS install
-	cd ..
-	rm -rf gawk-5.1.1
+	finish
 ;&
 
 "6.10")
 	### 6.10. Grep-3.7
-	tar -xf grep-3.7.tar.xz
-	cd grep-3.7
+	begin grep-3.7 tar.xz
 	./configure --prefix=/usr --host=$LFS_TGT
 	make
 	make DESTDIR=$LFS install
-	cd ..
-	rm -rf grep-3.7
+	finish
 ;&
 
 "6.11")
-	### 6.11. Gzip-1.11
-	tar -xf gzip-1.11.tar.xz
-	cd gzip-1.11
+	### 6.11. Gzip-1.12
+	begin gzip-1.12 tar.xz
 	./configure --prefix=/usr --host=$LFS_TGT
 	make
 	make DESTDIR=$LFS install
-	cd ..
-	rm -rf gzip-1.11
+	finish
 ;&
 
 "6.12")
 	### 6.12. Make-4.3
-	tar -xf make-4.3.tar.gz
-	cd make-4.3
-	./configure --prefix=/usr --without-guile --host=$LFS_TGT \
-		--build=$(build-aux/config.guess)
+	begin make-4.3 tar.gz
+	./configure --prefix=/usr   \
+            --without-guile \
+            --host=$LFS_TGT \
+            --build=$(build-aux/config.guess)
 	make
 	make DESTDIR=$LFS install
-	cd ..
-	rm -rf make-4.3
+	finish
 ;&
 
 "6.13")
 	### 6.13. Patch-2.7.6
-	tar -xf patch-2.7.6.tar.xz
-	cd patch-2.7.6
-	./configure --prefix=/usr --host=$LFS_TGT --build=$(build-aux/config.guess)
+	begin patch-2.7.6 tar.xz
+	./configure --prefix=/usr   \
+            --host=$LFS_TGT \
+            --build=$(build-aux/config.guess)
 	make
 	make DESTDIR=$LFS install
-	cd ..
-	rm -rf patch-2.7.6
+	finish
 ;&
 
 "6.14")
