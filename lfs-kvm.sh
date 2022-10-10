@@ -66,11 +66,9 @@ case "$KVM_LFS_CONTINUE" in
 	if [ ! -e $LFS/sources/md5sums-all-OK ]; then
 		sudo mkdir -pv $LFS/sources
 		sudo chmod -v a+wt $LFS/sources
-		LFS_PKG_URL="http://ftp.lfs-matrix.net/pub/lfs/lfs-packages/11.1/"
-		wget --continue --directory-prefix=$LFS/sources \
-			"$LFS_PKG_URL"/wget-list
-		wget --continue --directory-prefix=$LFS/sources \
-			"$LFS_PKG_URL"/md5sums
+		wget https://www.linuxfromscratch.org/lfs/view/11.2-systemd/wget-list-systemd $LFS/sources/
+		wget --input-file=wget-list-systemd --continue --directory-prefix=$LFS/sources
+		wget https://www.linuxfromscratch.org/lfs/view/11.2-systemd/md5sums $LFS/sources/
 		while [ ! -e $LFS/sources/md5sums-all-OK ]; do
 			#wget -nv --input-file=$LFS/sources/wget-list --continue --directory-prefix=$LFS/sources
 			for pkg in $(cat $LFS/sources/wget-list); do
