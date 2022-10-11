@@ -193,42 +193,43 @@ case "$KVM_LFS_CONTINUE" in
 
 "6.14")
 	### 6.14. Sed-4.8
-	tar -xf sed-4.8.tar.xz
-	cd sed-4.8
-	./configure --prefix=/usr --host=$LFS_TGT
+	begin sed-4.8 tar.xz
+	./configure --prefix=/usr \
+				--host=$LFS_TGT
 	make
 	make DESTDIR=$LFS install
-	cd ..
-	rm -rf sed-4.8
+	finish
 ;&
 
 "6.15")
 	### 6.15. Tar-1.34
-	tar -xf tar-1.34.tar.xz
+	begin tar-1.34 tar.xz
 	cd tar-1.34
-	./configure --prefix=/usr --host=$LFS_TGT --build=$(build-aux/config.guess)
+	./configure --prefix=/usr \
+				--host=$LFS_TGT \
+				--build=$(build-aux/config.guess)
 	make
 	make DESTDIR=$LFS install
-	cd ..
-	rm -rf tar-1.34
+	finish
 ;&
 
 "6.16")
-	### 6.16. Xz-5.2.5
-	tar -xf xz-5.2.5.tar.xz
-	cd xz-5.2.5
-	./configure --prefix=/usr --host=$LFS_TGT --build=$(build-aux/config.guess) \
-		--disable-static --docdir=/usr/share/doc/xz-5.2.5
+	### 6.16. Xz-5.2.6
+	begin xz-5.2.6 tar.xz
+	./configure --prefix=/usr                     \
+            --host=$LFS_TGT                   \
+            --build=$(build-aux/config.guess) \
+            --disable-static                  \
+            --docdir=/usr/share/doc/xz-5.2.6
 	make
 	make DESTDIR=$LFS install
-	cd ..
-	rm -rf xz-5.2.5
+	rm -v $LFS/usr/lib/liblzma.la
+	finish
 ;&
 
 "6.17")
-	### 6.17. Binutils-2.38 - Pass 2
-	tar -xf binutils-2.38.tar.xz
-	cd binutils-2.38
+	### 6.17. Binutils-2.39 - Pass 2
+	begin binutils-2.39 tar.xz
 	sed '6009s/$add_dir//' -i ltmain.sh
 	mkdir -v build
 	cd build
@@ -238,19 +239,19 @@ case "$KVM_LFS_CONTINUE" in
     	--host=$LFS_TGT            \
     	--disable-nls              \
     	--enable-shared            \
+    	--enable-gprofng=no        \
     	--disable-werror           \
     	--enable-64-bit-bfd
 	make
 	make DESTDIR=$LFS install
-	cd ../..
-	rm -rf binutils-2.38
+	rm -v $LFS/usr/lib/lib{bfd,ctf,ctf-nobfd,opcodes}.{a,la}
+	finish
 ;&
 
 "6.18")
-	### 6.18. GCC-11.2.0 - Pass 2
-	rm -rf gcc-11.2.0
-	tar -xf gcc-11.2.0.tar.xz
-	cd gcc-11.2.0
+	### 6.18. GCC-12.2.0 - Pass 2
+	rm -rf gcc-12.2.0
+	begin gcc-12.2.0 tar.xz
 	tar -xf ../mpfr-4.1.0.tar.xz
 	mv -v mpfr-4.1.0 mpfr
 	tar -xf ../gmp-6.2.1.tar.xz
@@ -258,10 +259,12 @@ case "$KVM_LFS_CONTINUE" in
 	tar -xf ../mpc-1.2.1.tar.gz
 	mv -v mpc-1.2.1 mpc
 	case $(uname -m) in
-  	  x86_64)
+	  x86_64)
     	sed -e '/m64=/s/lib64/lib/' -i.orig gcc/config/i386/t-linux64
   	  ;;
 	esac
+	sed '/thread_header =/s/@.*@/gthr-posix.h/' \
+    	-i libgcc/Makefile.in libstdc++-v3/include/Makefile.in
 	mkdir -v build
 	cd build
 	mkdir -pv $LFS_TGT/libgcc
@@ -269,8 +272,9 @@ case "$KVM_LFS_CONTINUE" in
 	../configure                                       \
     	--build=$(../config.guess)                     \
     	--host=$LFS_TGT                                \
+    	--target=$LFS_TGT                              \
+    	LDFLAGS_FOR_TARGET=-L$PWD/$LFS_TGT/libgcc      \
     	--prefix=/usr                                  \
-    	CC_FOR_TARGET=$LFS_TGT-gcc                     \
     	--with-build-sysroot=$LFS                      \
     	--enable-initfini-array                        \
     	--disable-nls                                  \
@@ -281,13 +285,11 @@ case "$KVM_LFS_CONTINUE" in
     	--disable-libquadmath                          \
     	--disable-libssp                               \
     	--disable-libvtv                               \
-    	--disable-libstdcxx                            \
     	--enable-languages=c,c++
 	make
 	make DESTDIR=$LFS install
 	ln -sv gcc $LFS/usr/bin/cc
-	cd ../..
-	rm -rf gcc-11.2.0
+	finish
 	echo "SUCCESS - 6"
 ;&
 esac
