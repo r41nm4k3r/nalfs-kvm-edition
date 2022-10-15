@@ -4,7 +4,7 @@
 
 ## Description
 
-Create qcow2 image for KVM (QEMU) of LFS 11.2 x86_64 systemd or sysvinit.
+Create qcow2 image for KVM (QEMU) of LFS 11.2 x86_64 systemd version.
 
 The goal of this project is to substitute the alfs project which is outdated.
 
@@ -20,7 +20,7 @@ This project is heavily based on lfs-kvm project by @fedorenchik so pay him a vi
 * Downloads all code automatically
 * Creates qcow2 image
 * Builds LFS 11.2
-* Supports systemd or sysvinit (w.i.p.)
+* Supports systemd
 * Can be resumed from almost every step
 
 ## Prerequisites
@@ -50,7 +50,7 @@ Modify variable KVM_LFS_INIT in lfs-kvm.sh.
 Supported values:
 ```
 systemd
-sysvinit
+sysvinit (not supported anymore)
 ```
 
 ## Side Effects
