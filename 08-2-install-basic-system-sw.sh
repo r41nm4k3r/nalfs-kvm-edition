@@ -6,6 +6,27 @@ set -v
 cd /
 cd /sources
 
+### Automate uncompress and clean up processes
+package_name=""
+package_ext=""
+
+begin() {
+	package_name=$1
+	package_ext=$2
+
+	echo "[lfs-cross] Starting build of $package_name at $(date)"
+
+	tar xf $package_name.$package_ext
+	cd $package_name
+}
+
+finish() {
+	echo "[lfs-cross] Finishing build of $package_name at $(date)"
+
+	cd $LFS/sources
+	rm -rf $package_name
+}
+
 case "$KVM_LFS_CONTINUE" in
 "8.34.2")
 	### 8.34. Bash-5.1.16 Continued
@@ -15,15 +36,14 @@ case "$KVM_LFS_CONTINUE" in
 ;&
 
 "8.35")
-	### 8.35. Libtool-2.4.6
-	tar -xf libtool-2.4.6.tar.xz
-	cd libtool-2.4.6
+	### 8.35. Libtool-2.4.7
+	begin libtool-2.4.7 tar.xz
 	./configure --prefix=/usr
 	make
 	make check TESTSUITEFLAGS=-j$NPROCx4 || true
 	make install
-	cd ..
-	rm -rf libtool-2.4.6
+	rm -fv /usr/lib/libltdl.a
+	finish
 ;&
 
 "8.36")
