@@ -48,290 +48,295 @@ case "$KVM_LFS_CONTINUE" in
 
 "8.36")
 	### 8.36. GDBM-1.23
-	tar -xf gdbm-1.23.tar.gz
-	cd gdbm-1.23
-	sed -r -i '/^char.*parseopt_program_(doc|args)/d' src/parseopt.c
-	./configure --prefix=/usr --disable-static --enable-libgdbm-compat
+	begin gdbm-1.23 tar.gz
+	./configure --prefix=/usr    \
+            --disable-static \
+            --enable-libgdbm-compat
 	make
 	make check
 	make install
-	cd ..
-	rm -rf gdbm-1.23
+	finish
 ;&
 
 "8.37")
 	### 8.37. Gperf-3.1
-	tar -xf gperf-3.1.tar.gz
-	cd gperf-3.1
+	begin gperf-3.1 tar.gz
 	./configure --prefix=/usr --docdir=/usr/share/doc/gperf-3.1
 	make
 	make -j1 check
 	make install
-	cd ..
-	rm -rf gperf-3.1
+	finish
 ;&
 
 "8.38")
-	### 8.38. Expat-2.4.6
-	tar -xf expat-2.4.6.tar.xz
-	cd expat-2.4.6
-	./configure --prefix=/usr --disable-static --docdir=/usr/share/doc/expat-2.4.6
+	### 8.38. Expat-2.4.8
+	begin expat-2.4.8 tar.xz
+	./configure --prefix=/usr    \
+            --disable-static \
+            --docdir=/usr/share/doc/expat-2.4.8
 	make
 	make check
 	make install
-	install -v -m644 doc/*.{html,png,css} /usr/share/doc/expat-2.4.6
-	cd ..
-	rm -rf expat-2.4.6
+	install -v -m644 doc/*.{html,css} /usr/share/doc/expat-2.4.8
+	finish
 ;&
 
 "8.39")
-	### 8.39. Inetutils-2.2
-	tar -xf inetutils-2.2.tar.xz
-	cd inetutils-2.2
-	./configure --prefix=/usr --localstatedir=/var --disable-logger \
-		--disable-whois --disable-rcp --disable-rexec --disable-rlogin \
-		--disable-rsh --disable-servers
+	### 8.39. Inetutils-2.3
+	begin inetutils-2.3 tar.xz
+	./configure --prefix=/usr        \
+            --bindir=/usr/bin    \
+            --localstatedir=/var \
+            --disable-logger     \
+            --disable-whois      \
+            --disable-rcp        \
+            --disable-rexec      \
+            --disable-rlogin     \
+            --disable-rsh        \
+            --disable-servers
 	make
 	make check || true
 	make install
-	mv -v /usr/bin/{hostname,ping,ping6,traceroute} /bin
-	mv -v /usr/bin/ifconfig /sbin
-	cd ..
-	rm -rf inetutils-2.2
+	mv -v /usr/{,s}bin/ifconfig
+	finish
 ;&
 
 "8.40")
-	### 8.40. Perl-5.34.0
-	tar -xf perl-5.34.0.tar.xz
-	cd perl-5.34.0
+	### 8.40. Less-590
+	begin less-590 tar.gz
+	./configure --prefix=/usr --sysconfdir=/etc
+	make
+	make install
+	finish
+;&
+
+
+"8.41")
+	### 8.41. Perl-5.36.0
+	begin perl-5.36.0.tar.xz
 	export BUILD_ZLIB=False
 	export BUILD_BZIP2=0
-	sh Configure -des -Dprefix=/usr -Dvendorprefix=/usr \
-		-Dprivlib=/usr/lib/perl5/5.32/core_perl \
-		-Darchlib=/usr/lib/perl5/5.32/core_perl \
-		-Dsitelib=/usr/lib/perl5/5.32/site_perl \
-		-Dsitearch=/usr/lib/perl5/5.32/site_perl \
-		-Dvendorlib=/usr/lib/perl5/5.32/vendor_perl \
-		-Dvendorarch=/usr/lib/perl5/5.32/vendor_perl \
-		-Dman1dir=/usr/share/man/man1 -Dman3dir=/usr/share/man/man3 \
-		-Dpager="/usr/bin/less -isR" -Duseshrplib -Dusethreads
+	sh Configure -des                                         \
+             -Dprefix=/usr                                \
+             -Dvendorprefix=/usr                          \
+             -Dprivlib=/usr/lib/perl5/5.36/core_perl      \
+             -Darchlib=/usr/lib/perl5/5.36/core_perl      \
+             -Dsitelib=/usr/lib/perl5/5.36/site_perl      \
+             -Dsitearch=/usr/lib/perl5/5.36/site_perl     \
+             -Dvendorlib=/usr/lib/perl5/5.36/vendor_perl  \
+             -Dvendorarch=/usr/lib/perl5/5.36/vendor_perl \
+             -Dman1dir=/usr/share/man/man1                \
+             -Dman3dir=/usr/share/man/man3                \
+             -Dpager="/usr/bin/less -isR"                 \
+             -Duseshrplib                                 \
+             -Dusethreads
 	make
 	make test
 	make install
 	unset BUILD_ZLIB BUILD_BZIP2
-	cd ..
-	rm -rf perl-5.34.0
+	finish
 ;&
 
-"8.41")
-	### 8.41. XML::Parser-2.46
-	tar -xf XML-Parser-2.46.tar.gz
-	cd XML-Parser-2.46
+"8.42")
+	### 8.42. XML::Parser-2.46
+	begin XML-Parser-2.46 tar.gz
 	perl Makefile.PL
 	make
 	make test
 	make install
-	cd ..
-	rm -rf XML-Parser-2.46
+	finish
 ;&
 
-"8.42")
-	### 8.42. Intltool-0.51.0
-	tar -xf intltool-0.51.0.tar.gz
-	cd intltool-0.51.0
+"8.43")
+	### 8.43. Intltool-0.51.0
+	begin intltool-0.51.0 tar.gz
 	sed -i 's:\\\${:\\\$\\{:' intltool-update.in
 	./configure --prefix=/usr
 	make
 	make check
 	make install
 	install -v -Dm644 doc/I18N-HOWTO /usr/share/doc/intltool-0.51.0/I18N-HOWTO
-	cd ..
-	rm -rf intltool-0.51.0
+	finish
 ;&
 
-"8.43")
-	### 8.43. Autoconf-2.71
-	tar -xf autoconf-2.71.tar.xz
-	cd autoconf-2.71
-	sed -i '361 s/{/\\{/' bin/autoscan.in
+"8.44")
+	### 8.44. Autoconf-2.71
+	begin autoconf-2.71 tar.xz
 	./configure --prefix=/usr
 	make
 	make check || true
 	make install
-	cd ..
-	rm -rf autoconf-2.71
+	finish
 ;&
 
-"8.44")
-	### 8.44. Automake-1.16.5
-	tar -xf automake-1.16.5.tar.xz
-	cd automake-1.16.5
-	sed -i "s/''/etags/" t/tags-lisp-space.sh
+"8.45")
+	### 8.45. Automake-1.16.5
+	begin automake-1.16.5 tar.xz
 	./configure --prefix=/usr --docdir=/usr/share/doc/automake-1.16.5
 	make
 	make -j$NPROCx4 check || true # test t/subobj.sh fail
 	make install
-	cd ..
-	rm -rf automake-1.16.5
-;&
-
-"8.45")
-	### 8.45. Kmod-29
-	tar -xf kmod-29.tar.xz
-	cd kmod-29
-	./configure --prefix=/usr --bindir=/bin --sysconfdir=/etc \
-		--with-rootlibdir=/lib --with-xz --with-zlib
-	make
-	make install
-	for target in depmod insmod lsmod modinfo modprobe rmmod; do
-		ln -sfv ../bin/kmod /sbin/$target
-	done
-	ln -sfv kmod /bin/lsmod
-	cd ..
-	rm -rf kmod-29
+	finish
 ;&
 
 "8.46")
-	### 8.46. Libelf from Elfutils-0.186
-	tar -xf elfutils-0.186.tar.bz2
-	cd elfutils-0.186
-	./configure --prefix=/usr --disable-debuginfod --libdir=/lib
-	make
-	make check
-	make -C libelf install
-	install -vm644 config/libelf.pc /usr/lib/pkgconfig
-	rm /lib/libelf.a
-	cd ..
-	rm -rf elfutils-0.186
-;&
-
-"8.47")
-	### 8.47. Libffi-3.4.2
-	tar -xf libffi-3.4.2.tar.gz
-	cd libffi-3.4.2
-	case $(uname -m) in
-		i?86) GCC_ARCH_ARG='i386' ;;
-		x86_64) GCC_ARCH_ARG='x86-64' ;;
-	esac
-	./configure --prefix=/usr --disable-static --with-gcc-arch=$GCC_ARCH_ARG
-	make
-	make check
-	make install
-	cd ..
-	rm -rf libffi-3.4.2
-;&
-
-"8.48")
-	### 8.48. OpenSSL-3.0.1
-	tar -xf openssl-3.0.1.tar.gz
-	cd openssl-3.0.1
-	./config --prefix=/usr --openssldir=/etc/ssl --libdir=lib shared zlib-dynamic
+	### 8.46. OpenSSL-3.0.5
+	begin openssl-3.0.1 tar.gz
+	./config --prefix=/usr         \
+         --openssldir=/etc/ssl \
+         --libdir=lib          \
+         shared                \
+         zlib-dynamic
 	make
 	make test || true # test 30-test_afalg.t fail
 	sed -i '/INSTALL_LIBS/s/libcrypto.a libssl.a//' Makefile
 	make MANSUFFIX=ssl install
-	mv -v /usr/share/doc/openssl /usr/share/doc/openssl-3.0.1
-	cp -vfr doc/* /usr/share/doc/openssl-3.0.1
-	cd ..
-	rm -rf openssl-3.0.1
+	mv -v /usr/share/doc/openssl /usr/share/doc/openssl-3.0.5
+	cp -vfr doc/* /usr/share/doc/openssl-3.0.5
+	finish
+;&
+
+"8.47")
+	### 8.47. Kmod-30
+	begin kmod-30 tar.xz
+	./configure --prefix=/usr          \
+            --sysconfdir=/etc      \
+            --with-openssl         \
+            --with-xz              \
+            --with-zstd            \
+            --with-zlib
+	make
+	make install
+	for target in depmod insmod modinfo modprobe rmmod; do
+	  ln -sfv ../bin/kmod /usr/sbin/$target
+	done
+	ln -sfv kmod /usr/bin/lsmod
+	finish
+;&
+
+"8.48")
+	### 8.48. Libelf from Elfutils-0.187
+	begin elfutils-0.187 tar.bz2
+	./configure --prefix=/usr                \
+            --disable-debuginfod         \
+            --enable-libdebuginfod=dummy
+	make
+	make check
+	make -C libelf install
+	install -vm644 config/libelf.pc /usr/lib/pkgconfig
+	rm /usr/lib/libelf.a
+	finish
 ;&
 
 "8.49")
-	### 8.49. Python-3.10.2
-	tar -xf Python-3.10.2.tar.xz
-	cd Python-3.10.2
-	./configure --prefix=/usr --enable-shared --with-system-expat \
-		--with-system-ffi --with-ensurepip=yes
+	### 8.49. Libffi-3.4.2
+	begin libffi-3.4.2 tar.gz
+	./configure --prefix=/usr          \
+            --disable-static       \
+            --with-gcc-arch=native \
+            --disable-exec-static-tramp
 	make
-	# make test || true # test hang befause no network
+	make check
 	make install
-	chmod -v 755 /usr/lib/libpython3.8.so
-	chmod -v 755 /usr/lib/libpython3.so
-	ln -sfv pip3.8 /usr/bin/pip3
-	install -v -dm755 /usr/share/doc/python-3.10.2/html
-	tar --strip-components=1 --no-same-owner --no-same-permissions \
-		-C /usr/share/doc/python-3.10.2/html \
-		-xvf ../python-3.10.2-docs-html.tar.bz2
-	cd ..
-	rm -rf Python-3.10.2
+	finish
 ;&
 
 "8.50")
-	### 8.50. Ninja-1.10.2
-	tar -xf ninja-1.10.2.tar.gz
-	cd ninja-1.10.2
+	### 8.50. Python-3.10.6
+	begin Python-3.10.2 tar.xz
+	./configure --prefix=/usr        \
+            --enable-shared      \
+            --with-system-expat  \
+            --with-system-ffi    \
+            --enable-optimizations
+	make
+	make install
+	cat > /etc/pip.conf << EOF
+	[global]
+	root-user-action = ignore
+	disable-pip-version-check = true
+EOF
+	install -v -dm755 /usr/share/doc/python-3.10.6/html
+
+	tar --strip-components=1  \
+    	--no-same-owner       \
+    	--no-same-permissions \
+    	-C /usr/share/doc/python-3.10.6/html \
+    	-xvf ../python-3.10.6-docs-html.tar.bz2
+	finish
+;&
+
+"8.51")
+	### 8.51. Wheel-0.37.1
+	begin wheel-0.37.1 tar.gz
+	pip3 install --no-index $PWD
+	finish
+;&
+
+"8.52")
+	### 8.52. Ninja-1.11.0
+	begin ninja-1.11.0 tar.gz
 	export NINJAJOBS=$NPROC
 	sed -i '/int Guess/a \
-	int j = 0;\
-	char* jobs = getenv("NINJAJOBS");\
-	if (jobs != NULL) j = atoi(jobs);\
-	if (j>0) return j;\
+	  int   j = 0;\
+	  char* jobs = getenv( "NINJAJOBS" );\
+	  if ( jobs != NULL ) j = atoi( jobs );\
+	  if ( j > 0 ) return j;\
 	' src/ninja.cc
 	python3 configure.py --bootstrap
 	./ninja ninja_test
 	./ninja_test --gtest_filter=-SubprocessTest.SetWithLots
 	install -vm755 ninja /usr/bin/
-	install -vDm644 misc/bash-completion \
-		/usr/share/bash-completion/completions/ninja
-	install -vDm644 misc/zsh-completion /usr/share/zsh/site-functions/_ninja
-	cd ..
-	rm -rf ninja-1.10.2
+	install -vDm644 misc/bash-completion /usr/share/bash-completion/completions/ninja
+	install -vDm644 misc/zsh-completion  /usr/share/zsh/site-functions/_ninja
+	finish
 ;&
 
-"8.51")
-	### 8.51. Meson-0.61.1
-	tar -xf meson-0.61.1.tar.gz
-	cd meson-0.61.1
-	python3 setup.py build
-	python3 setup.py install --root=dest
-	cp -rv dest/* /
-	cd ..
-	rm -rf meson-0.61.1
+"8.53")
+	### 8.53. Meson-0.63.1
+	begin meson-0.63.1 tar.gz
+	pip3 wheel -w dist --no-build-isolation --no-deps $PWD
+	pip3 install --no-index --find-links dist meson
+	install -vDm644 data/shell-completions/bash/meson /usr/share/bash-completion/completions/meson
+	install -vDm644 data/shell-completions/zsh/_meson /usr/share/zsh/site-functions/_meson
+	finish
 ;&
 
-"8.52")
-	### 8.52. Coreutils-9.0
-	[ -e coreutils-9.0 ] && rm -rfv coreutils-9.0
-	tar -xf coreutils-9.0.tar.xz
-	cd coreutils-9.0
-	patch -Np1 -i ../coreutils-9.0-i18n-1.patch
-	sed -i '/test.lock/s/^/#/' gnulib-tests/gnulib.mk
+"8.54")
+	### 8.54. Coreutils-9.1
+	[ -e coreutils-9.1 ] && rm -rfv coreutils-9.1
+	begin coreutils-9.1 tar.xz
+	patch -Np1 -i ../coreutils-9.1-i18n-1.patch
 	autoreconf -fiv
-	FORCE_UNSAFE_CONFIGURE=1 ./configure --prefix=/usr \
-		--enable-no-install-program=kill,uptime
+	FORCE_UNSAFE_CONFIGURE=1 ./configure \
+    	        --prefix=/usr            \
+    	        --enable-no-install-program=kill,uptime
 	make
 	make NON_ROOT_USERNAME=tester check-root
 	echo "dummy:x:102:tester" >> /etc/group
-	chown -Rv tester .
-	su tester -c "PATH=$PATH make RUN_EXPENSIVE_TESTS=yes check" || true # test test-getlogin may fail
+	chown -Rv tester . 	
+	su tester -c "PATH=$PATH make RUN_EXPENSIVE_TESTS=yes check"
 	sed -i '/dummy/d' /etc/group
 	make install
-	mv -v /usr/bin/{cat,chgrp,chmod,chown,cp,date,dd,df,echo} /bin
-	mv -v /usr/bin/{false,ln,ls,mkdir,mknod,mv,pwd,rm} /bin
-	mv -v /usr/bin/{rmdir,stty,sync,true,uname} /bin
 	mv -v /usr/bin/chroot /usr/sbin
 	mv -v /usr/share/man/man1/chroot.1 /usr/share/man/man8/chroot.8
-	sed -i 's/"1"/"8"/' /usr/share/man/man8/chroot.8
-	mv -v /usr/bin/{head,nice,sleep,touch} /bin
-	cd ..
-	rm -rf coreutils-9.0
+	sed -i 's/"1"/"8"/' /usr/share/man/man8/chroot.8		
+	finish
 ;&
 
 "8.53")
 	### 8.53. Check-0.15.2
-	tar -xf check-0.15.2.tar.gz
-	cd check-0.15.2
+	begin check-0.15.2 tar.gz
 	./configure --prefix=/usr --disable-static
 	make
 	make check
 	make docdir=/usr/share/doc/check-0.15.2 install
-	cd ..
-	rm -rf check-0.15.2
+	finish
 ;&
 
 "8.54")
 	### 8.54. Diffutils-3.8
-	tar -xf diffutils-3.8.tar.xz
+	begin diffutils-3.8.tar.xz
 	cd diffutils-3.8
 	./configure --prefix=/usr
 	make
@@ -343,7 +348,7 @@ case "$KVM_LFS_CONTINUE" in
 
 "8.55")
 	### 8.55. Gawk-5.1.1
-	tar -xf gawk-5.1.1.tar.xz
+	begin gawk-5.1.1.tar.xz
 	cd gawk-5.1.1
 	sed -i 's/extras//' Makefile.in
 	./configure --prefix=/usr
@@ -358,7 +363,7 @@ case "$KVM_LFS_CONTINUE" in
 
 "8.56")
 	### 8.56. Findutils-4.9.0
-	tar -xf findutils-4.9.0.tar.xz
+	begin findutils-4.9.0.tar.xz
 	cd findutils-4.9.0
 	./configure --prefix=/usr --localstatedir=/var/lib/locate
 	make
@@ -373,7 +378,7 @@ case "$KVM_LFS_CONTINUE" in
 
 "8.57")
 	### 8.57. Groff-1.22.4
-	tar -xf groff-1.22.4.tar.gz
+	begin groff-1.22.4.tar.gz
 	cd groff-1.22.4
 	echo A4 > /etc/papersize
 	PAGE=A4 ./configure --prefix=/usr
@@ -385,7 +390,7 @@ case "$KVM_LFS_CONTINUE" in
 
 "8.58")
 	### 8.58. GRUB-2.06
-	tar -xf grub-2.06.tar.xz
+	begin grub-2.06.tar.xz
 	cd grub-2.06
 	./configure --prefix=/usr --sbindir=/sbin --sysconfdir=/etc --disable-efiemu \
 		--disable-werror
@@ -396,20 +401,10 @@ case "$KVM_LFS_CONTINUE" in
 	rm -rf grub-2.06
 ;&
 
-"8.59")
-	### 8.59. Less-590
-	tar -xf less-590.tar.gz
-	cd less-590
-	./configure --prefix=/usr --sysconfdir=/etc
-	make
-	make install
-	cd ..
-	rm -rf less-590
-;&
 
 "8.60")
 	### 8.60. Gzip-1.11
-	tar -xf gzip-1.11.tar.xz
+	begin gzip-1.11.tar.xz
 	cd gzip-1.11
 	./configure --prefix=/usr
 	make
@@ -422,7 +417,7 @@ case "$KVM_LFS_CONTINUE" in
 
 "8.61")
 	### 8.61. IPRoute2-5.16.0
-	tar -xf iproute2-5.16.0.tar.xz
+	begin iproute2-5.16.0.tar.xz
 	cd iproute2-5.16.0
 	sed -i /ARPD/d Makefile
 	rm -fv man/man8/arpd.8
@@ -435,7 +430,7 @@ case "$KVM_LFS_CONTINUE" in
 
 "8.62")
 	### 8.62. Kbd-2.4.0
-	tar -xf kbd-2.4.0.tar.xz
+	begin kbd-2.4.0.tar.xz
 	cd kbd-2.4.0
 	patch -Np1 -i ../kbd-2.4.0-backspace-1.patch
 	sed -i '/RESIZECONS_PROGS=/s/yes/no/' configure
@@ -453,7 +448,7 @@ case "$KVM_LFS_CONTINUE" in
 
 "8.63")
 	### 8.63. Libpipeline-1.5.5
-	tar -xf libpipeline-1.5.5.tar.gz
+	begin libpipeline-1.5.5.tar.gz
 	cd libpipeline-1.5.5
 	./configure --prefix=/usr
 	make
@@ -465,7 +460,7 @@ case "$KVM_LFS_CONTINUE" in
 
 "8.64")
 	### 8.64. Make-4.3
-	tar -xf make-4.3.tar.gz
+	begin make-4.3.tar.gz
 	cd make-4.3
 	./configure --prefix=/usr
 	make
@@ -477,7 +472,7 @@ case "$KVM_LFS_CONTINUE" in
 
 "8.65")
 	### 8.65. Patch-2.7.6
-	tar -xf patch-2.7.6.tar.xz
+	begin patch-2.7.6.tar.xz
 	cd patch-2.7.6
 	./configure --prefix=/usr
 	make
@@ -489,7 +484,7 @@ case "$KVM_LFS_CONTINUE" in
 
 "8.66")
 	### 8.66. Man-DB-2.10.1
-	tar -xf man-db-2.10.1.tar.xz
+	begin man-db-2.10.1.tar.xz
 	cd man-db-2.10.1
 	if [ "$KVM_LFS_INIT" == "systemd" ]; then
 		sed -i '/find/s@/usr@@' init/systemd/man-db.service.in
@@ -510,7 +505,7 @@ case "$KVM_LFS_CONTINUE" in
 
 "8.67")
 	### 8.67. Tar-1.34
-	tar -xf tar-1.34.tar.xz
+	begin tar-1.34.tar.xz
 	cd tar-1.34
 	FORCE_UNSAFE_CONFIGURE=1 ./configure --prefix=/usr --bindir=/bin
 	make
@@ -523,7 +518,7 @@ case "$KVM_LFS_CONTINUE" in
 
 "8.68")
 	### 8.68. Texinfo-6.8
-	tar -xf texinfo-6.8.tar.xz
+	begin texinfo-6.8.tar.xz
 	cd texinfo-6.8
 	./configure --prefix=/usr --disable-static
 	make
@@ -542,7 +537,7 @@ case "$KVM_LFS_CONTINUE" in
 
 "8.69")
 	### 8.69. Vim-8.2.4383
-	tar -xf vim-8.2.4383.tar.gz
+	begin vim-8.2.4383.tar.gz
 	cd vim-8.2.4383
 	echo '#define SYS_VIMRC_FILE "/etc/vimrc"' >> src/feature.h
 	./configure --prefix=/usr
@@ -583,7 +578,7 @@ EOF
 "8.70")
 if [ "$KVM_LFS_INIT" == "sysvinit" ]; then
 	### 8.70. Eudev-3.2.9
-	tar -xf eudev-3.2.9.tar.gz
+	begin eudev-3.2.9.tar.gz
 	cd eudev-3.2.9
 	./configure --prefix=/usr --bindir=/sbin --sbindir=/sbin --libdir=/usr/lib \
 		--sysconfdir=/etc --libexecdir=/lib --with-rootprefix= \
@@ -600,10 +595,10 @@ if [ "$KVM_LFS_INIT" == "sysvinit" ]; then
 	rm -rf eudev-3.2.9
 elif [ "$KVM_LFS_INIT" == "systemd" ]; then
 	### 8.70. Systemd-250
-	tar -xf systemd-250.tar.gz
+	begin systemd-250.tar.gz
 	cd systemd-250
 	ln -sf /bin/true /usr/bin/xsltproc
-	tar -xf ../systemd-man-pages-250.tar.xz
+	begin ../systemd-man-pages-250.tar.xz
 	sed '177,$ d' -i src/resolve/meson.build
 	sed -i 's/GROUP="render", //' rules.d/50-udev-default.rules.in
 	mkdir -p build
@@ -630,7 +625,7 @@ elif [ "$KVM_LFS_INIT" == "systemd" ]; then
 	rm -rf systemd-250
 
 	### 8.71. D-Bus-1.12.20
-	tar -xf dbus-1.12.20.tar.gz
+	begin dbus-1.12.20.tar.gz
 	cd dbus-1.12.20
 	./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var \
 		--disable-static --disable-doxygen-docs --disable-xml-docs \
@@ -651,7 +646,7 @@ fi
 
 "8.71")
 	### 8.71. Procps-ng-3.3.17
-	tar -xf procps-ng-3.3.17.tar.xz
+	begin procps-ng-3.3.17.tar.xz
 	cd procps-ng-3.3.17
 	if [ "$KVM_LFS_INIT" == "systemd" ]; then
 		KVM_LFS_PROCPSNG_CONF_ARG="--with-systemd"
@@ -670,7 +665,7 @@ fi
 
 "8.72")
 	### 8.72. Util-linux-2.37.4
-	tar -xf util-linux-2.37.4.tar.xz
+	begin util-linux-2.37.4.tar.xz
 	cd util-linux-2.37.4
 	mkdir -pv /var/lib/hwclock
 	if [ "$KVM_LFS_INIT" == "sysvinit" ]; then
@@ -694,7 +689,7 @@ fi
 
 "8.73")
 	### 8.73. E2fsprogs-1.46.5
-	tar -xf e2fsprogs-1.46.5.tar.gz
+	begin e2fsprogs-1.46.5.tar.gz
 	cd e2fsprogs-1.46.5
 	mkdir -v build
 	cd build
@@ -717,7 +712,7 @@ fi
 "8.74")
 if [ "$KVM_LFS_INIT" == "sysvinit" ]; then
 	### 8.74. Sysklogd-1.5.1
-	tar -xf sysklogd-1.5.1.tar.gz
+	begin sysklogd-1.5.1.tar.gz
 	cd sysklogd-1.5.1
 	sed -i '/Error loading kernel symbols/{n;n;d}' ksym_mod.c
 	sed -i 's/union wait/int/' syslogd.c
@@ -740,7 +735,7 @@ EOF
 	rm -rf sysklogd-1.5.1
 
 	### 8.75. Sysvinit-2.97
-	tar -xf sysvinit-2.97.tar.xz
+	begin sysvinit-2.97.tar.xz
 	cd sysvinit-2.97
 	patch -Np1 -i ../sysvinit-2.97-consolidated-1.patch
 	make
