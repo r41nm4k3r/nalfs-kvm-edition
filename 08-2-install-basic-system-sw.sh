@@ -567,59 +567,54 @@ EOF
 	finish
 ;&
 
-"8.66")
-	### 8.66. Man-DB-2.10.1
-	begin man-db-2.10.1.tar.xz
-	cd man-db-2.10.1
-	if [ "$KVM_LFS_INIT" == "systemd" ]; then
-		sed -i '/find/s@/usr@@' init/systemd/man-db.service.in
-	fi
-	if [ "$KVM_LFS_INIT" == "sysvinit" ]; then
-		KVM_LFS_MANDB_CONF_ARG="--with-systemdtmpfilesdir= --with-systemdsystemunitdir="
-	fi
-	./configure --prefix=/usr --docdir=/usr/share/doc/man-db-2.10.1 \
-		--sysconfdir=/etc --disable-setuid --enable-cache-owner=bin \
-		--with-browser=/usr/bin/lynx --with-vgrind=/usr/bin/vgrind \
-		--with-grap=/usr/bin/grap $KVM_LFS_MANDB_CONF_ARG
+"8.74")
+	### 8.74. Man-DB-2.10.2
+	begin man-db-2.10.2 tar.xz
+	./configure --prefix=/usr                         \
+            --docdir=/usr/share/doc/man-db-2.10.2 \
+            --sysconfdir=/etc                     \
+            --disable-setuid                      \
+            --enable-cache-owner=bin              \
+            --with-browser=/usr/bin/lynx          \
+            --with-vgrind=/usr/bin/vgrind         \
+            --with-grap=/usr/bin/grap
 	make
 	make check
 	make install
-	cd ..
-	rm -rf man-db-2.10.1
+	finish
 ;&
 
-"8.71")
-	### 8.71. Procps-ng-3.3.17
-	begin procps-ng-3.3.17.tar.xz
-	cd procps-ng-3.3.17
-	if [ "$KVM_LFS_INIT" == "systemd" ]; then
-		KVM_LFS_PROCPSNG_CONF_ARG="--with-systemd"
-	fi
-	./configure --prefix=/usr --exec-prefix= --libdir=/usr/lib \
-		--docdir=/usr/share/doc/procps-ng-3.3.17 --disable-static \
-		--disable-kill $KVM_LFS_PROCPSNG_CONF_ARG
+"8.75")
+	### 8.75. Procps-ng-4.0.0
+	begin procps-ng-4.0.0 tar.xz
+	./configure --prefix=/usr                            \
+            --docdir=/usr/share/doc/procps-ng-4.0.0 \
+            --disable-static                         \
+            --disable-kill                           \
+            --with-systemd
 	make
 	make check
 	make install
-	mv -v /usr/lib/libprocps.so.* /lib
-	ln -sfv ../../lib/$(readlink /usr/lib/libprocps.so) /usr/lib/libprocps.so
-	cd ..
-	rm -rf procps-ng-3.3.17
+	finish
 ;&
 
-"8.72")
-	### 8.72. Util-linux-2.37.4
-	begin util-linux-2.37.4.tar.xz
-	cd util-linux-2.37.4
-	mkdir -pv /var/lib/hwclock
-	if [ "$KVM_LFS_INIT" == "sysvinit" ]; then
-		KVM_LFS_UTILLINUX_CONF_ARG="--without-systemd --without-systemdsystemunitdir"
-	fi
-	./configure ADJTIME_PATH=/var/lib/hwclock/adjtime \
-		--docdir=/usr/share/doc/util-linux-2.37.4 --disable-chfn-chsh \
-		--disable-login --disable-nologin --disable-su --disable-setpriv \
-		--disable-runuser --disable-pylibmount --disable-static \
-		--without-python $KVM_LFS_UTILLINUX_CONF_ARG
+"8.76")
+	### 8.76. Util-linux-2.38.1 
+	begin util-linux-2.38.1 tar.xz
+	./configure ADJTIME_PATH=/var/lib/hwclock/adjtime   \
+            --bindir=/usr/bin    \
+            --libdir=/usr/lib    \
+            --sbindir=/usr/sbin  \
+            --docdir=/usr/share/doc/util-linux-2.38.1 \
+            --disable-chfn-chsh  \
+            --disable-login      \
+            --disable-nologin    \
+            --disable-su         \
+            --disable-setpriv    \
+            --disable-runuser    \
+            --disable-pylibmount \
+            --disable-static     \
+            --without-python
 	make
 	# to run tests, need to check that kernel config must include CONFIG_SCSI_DEBUG=m (not 'y' or 'n', must be 'm')
 	# do not run tests as they may damage the system (if run as root)
@@ -627,96 +622,98 @@ EOF
 	chown -Rv tester .
 	su tester -c "make -k check"
 	make install
-	cd ..
-	rm -rf util-linux-2.37.4
-;&
-
-"8.73")
-	### 8.73. E2fsprogs-1.46.5
-	begin e2fsprogs-1.46.5.tar.gz
-	cd e2fsprogs-1.46.5
-	mkdir -v build
-	cd build
-	../configure --prefix=/usr --bindir=/bin --with-root-prefix="" \
-		--enable-elf-shlibs --disable-libblkid --disable-libuuid \
-		--disable-uuidd --disable-fsck
-	make
-	make check
-	make install
-	chmod -v u+w /usr/lib/{libcom_err,libe2p,libext2fs,libss}.a
-	gunzip -v /usr/share/info/libext2fs.info.gz
-	install-info --dir-file=/usr/share/info/dir /usr/share/info/libext2fs.info
-	makeinfo -o doc/com_err.info ../lib/et/com_err.texinfo
-	install -v -m644 doc/com_err.info /usr/share/info
-	install-info --dir-file=/usr/share/info/dir /usr/share/info/com_err.info
-	cd ../..
-	rm -rf e2fsprogs-1.46.5
-;&
-
-"8.74")
-if [ "$KVM_LFS_INIT" == "sysvinit" ]; then
-	### 8.74. Sysklogd-1.5.1
-	begin sysklogd-1.5.1.tar.gz
-	cd sysklogd-1.5.1
-	sed -i '/Error loading kernel symbols/{n;n;d}' ksym_mod.c
-	sed -i 's/union wait/int/' syslogd.c
-	make
-	make BINDIR=/sbin install
-	cat > /etc/syslog.conf << "EOF"
-# Begin /etc/syslog.conf
-
-auth,authriv.* -/var/log/auth.log
-*.*;auth,authpriv.none -/var/log/sys.log
-daemon.* -/var/log/daemon.log
-kern.* -/var/log/kern.log
-mail.* -/var/log/mail.log
-user.* -/var/log/user.log
-*.emerg *
-
-# End /etc/syslog.conf
-EOF
-	cd ..
-	rm -rf sysklogd-1.5.1
-
-	### 8.75. Sysvinit-2.97
-	begin sysvinit-2.97.tar.xz
-	cd sysvinit-2.97
-	patch -Np1 -i ../sysvinit-2.97-consolidated-1.patch
-	make
-	make install
-	cd ..
-	rm -rf sysvinit-2.97
-fi
+	finish
 ;&
 
 "8.77")
-	### 8.77. Stripping Again
-	save_lib="ld-2.32.so libc-2.32.so libpthread-2.32.so libthread_db-1.0.so"
-	cd /lib
-	for LIB in $save_lib; do
-		objcopy --only-keep-debug $LIB $LIB.dbg
-		strip --strip-unneeded $LIB
-		objcopy --add-gnu-debuglink=$LIB.dbg $LIB
-	done
-	save_usrlib="libquadmath.so.0.0.0 libstdc++.so.6.0.29 libitm.so.1.0.0
-			libatomic.so.1.2.0"
+	### 8.77. E2fsprogs-1.46.5
+	begin e2fsprogs-1.46.5 tar.gz
+	mkdir -v build
+	cd build
+	../configure --prefix=/usr           \
+             --sysconfdir=/etc       \
+             --enable-elf-shlibs     \
+             --disable-libblkid      \
+             --disable-libuuid       \
+             --disable-uuidd         \
+             --disable-fsck
+	make
+	make check
+	make install
+	rm -fv /usr/lib/{libcom_err,libe2p,libext2fs,libss}.a
+	gunzip -v /usr/share/info/libext2fs.info.gz
+	install-info --dir-file=/usr/share/info/dir /usr/share/info/libext2fs.info
+	makeinfo -o      doc/com_err.info ../lib/et/com_err.texinfo
+	install -v -m644 doc/com_err.info /usr/share/info
+	install-info --dir-file=/usr/share/info/dir /usr/share/info/com_err.info
+	finish
+;&
+
+"8.78")
+	### 8.78. Stripping Again
+	save_usrlib="$(cd /usr/lib; ls ld-linux*[^g])
+	             libc.so.6
+	             libthread_db.so.1
+	             libquadmath.so.0.0.0
+	             libstdc++.so.6.0.30
+	             libitm.so.1.0.0
+	             libatomic.so.1.2.0"
+
 	cd /usr/lib
+
 	for LIB in $save_usrlib; do
-		objcopy --only-keep-debug $LIB $LIB.dbg
-		strip --strip-unneeded $LIB
-		objcopy --add-gnu-debuglink=$LIB.dbg $LIB
+	    objcopy --only-keep-debug $LIB $LIB.dbg
+	    cp $LIB /tmp/$LIB
+	    strip --strip-unneeded /tmp/$LIB
+	    objcopy --add-gnu-debuglink=$LIB.dbg /tmp/$LIB
+	    install -vm755 /tmp/$LIB /usr/lib
+	    rm /tmp/$LIB
 	done
-	unset LIB save_lib save_usrlib
-	find /usr/lib -type f -name \*.a -exec strip --strip-debug {} ';'
-	find /lib /usr/lib -type f -name \*.so* ! -name \*dbg \
-		-exec strip --strip-unneeded {} ';'
-	find /{bin,sbin} /usr/{bin,sbin,libexec} -type f -exec strip --strip-all {} ';'
+
+	online_usrbin="bash find strip"
+	online_usrlib="libbfd-2.39.so
+	               libhistory.so.8.1
+	               libncursesw.so.6.3
+	               libm.so.6
+	               libreadline.so.8.1
+	               libz.so.1.2.12
+	               $(cd /usr/lib; find libnss*.so* -type f)"
+
+	for BIN in $online_usrbin; do
+	    cp /usr/bin/$BIN /tmp/$BIN
+	    strip --strip-unneeded /tmp/$BIN
+	    install -vm755 /tmp/$BIN /usr/bin
+	    rm /tmp/$BIN
+	done
+
+	for LIB in $online_usrlib; do
+	    cp /usr/lib/$LIB /tmp/$LIB
+	    strip --strip-unneeded /tmp/$LIB
+	    install -vm755 /tmp/$LIB /usr/lib
+	    rm /tmp/$LIB
+	done
+
+	for i in $(find /usr/lib -type f -name \*.so* ! -name \*dbg) \
+	         $(find /usr/lib -type f -name \*.a)                 \
+	         $(find /usr/{bin,sbin,libexec} -type f); do
+	    case "$online_usrbin $online_usrlib $save_usrlib" in
+	        *$(basename $i)* )
+	            ;;
+	        * ) strip --strip-unneeded $i
+	            ;;
+	    esac
+	done
+
+	unset BIN LIB save_usrlib online_usrbin online_usrlib
 ;&
 
 "8.78")
 	### 8.78. Cleaning Up
 	rm -rf /tmp/*
-	echo "SUCCESS - 8.2"
+	find /usr/lib /usr/libexec -name \*.la -delete
+	find /usr -depth -name $(uname -m)-lfs-linux-gnu\* | xargs rm -rf
+	userdel -r tester
+	echo "SUCCESS - 8.2" >> 8-2.log
 	logout
 ;&
 esac
