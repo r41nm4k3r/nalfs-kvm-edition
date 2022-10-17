@@ -10,9 +10,9 @@ fi
 set -e
 set -x
 
-IMAGE_SIZE=21
+IMAGE_SIZE=50
 IMAGE_DIR=$(pwd)
-IMAGE_NAME=lfs-11-1.qcow2
+IMAGE_NAME=lfs-11-2.qcow2
 IMAGE_PATH=${IMAGE_DIR}/${IMAGE_NAME}
 export NPROC=$(nproc)
 let NPROCx4=$NPROC*4
@@ -45,7 +45,7 @@ case "$KVM_LFS_CONTINUE" in
 		sudo qemu-nbd -c /dev/nbd0 ${IMAGE_PATH}
 	fi
 	if [ ! -e /dev/nbd0p1 ]; then
-		sudo parted /dev/nbd0 mklabel gpt mkpart lfs_root ext4 1MiB 18GiB mkpart lfs_swap linux-swap 18GiB 20GiB
+		sudo parted /dev/nbd0 mklabel gpt mkpart lfs_root ext4 1MiB 45GiB mkpart lfs_swap linux-swap 46GiB 49GiB
 		sudo partprobe /dev/nbd0
 		sudo mkfs -v -t ext4 /dev/nbd0p1
 		sudo mkswap /dev/nbd0p2
@@ -63,23 +63,18 @@ case "$KVM_LFS_CONTINUE" in
 
 "3.1")
 	# download packages
-	if [ ! -e $LFS/sources/md5sums-all-OK ]; then
-		sudo mkdir -pv $LFS/sources
-		sudo chmod -v a+wt $LFS/sources
-		wget https://www.linuxfromscratch.org/lfs/view/11.2-systemd/wget-list-systemd $LFS/sources/
-		wget --input-file=wget-list-systemd --continue --directory-prefix=$LFS/sources
-		wget https://www.linuxfromscratch.org/lfs/view/11.2-systemd/md5sums $LFS/sources/
-		while [ ! -e $LFS/sources/md5sums-all-OK ]; do
-			#wget -nv --input-file=$LFS/sources/wget-list --continue --directory-prefix=$LFS/sources
-			for pkg in $(cat $LFS/sources/wget-list); do
-				wget --continue --directory-prefix=$LFS/sources \
-					"$LFS_PKG_URL"/$(basename $pkg)
-			done
-			pushd $LFS/sources
-			md5sum -c md5sums && touch md5sums-all-OK || true
-			popd
-		done
-	fi
+	sudo mkdir -pv $LFS/sources
+	sudo chmod -v a+wt $LFS/sources
+	cd $LFS/sources
+
+	wget https://www.linuxfromscratch.org/lfs/view/11.2-systemd/wget-list-systemd
+
+	wget --input-file=wget-list-systemd --continue --directory-prefix=$LFS/sources
+
+	wget https://www.linuxfromscratch.org/lfs/view/11.2-systemd/md5sums $LFS/sources/
+	pushd $LFS/sources
+		md5sum -c md5sums && touch md5sums-all-OK || true
+	popd
 ;&
 
 "4.2")

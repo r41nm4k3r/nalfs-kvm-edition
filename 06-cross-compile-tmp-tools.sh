@@ -68,6 +68,7 @@ case "$KVM_LFS_CONTINUE" in
 	make DESTDIR=$LFS TIC_PATH=$(pwd)/build/progs/tic install
 	echo "INPUT(-lncursesw)" > $LFS/usr/lib/libncurses.so
 	finish
+;&
 
 "6.4")
 	### 6.4 Bash-5.1.16
@@ -102,7 +103,6 @@ case "$KVM_LFS_CONTINUE" in
 "6.6")
 	### 6.6. Diffutils-3.8
 	begin diffutils-3.8 tar.xz
-	cd diffutils-3.8
 	./configure --prefix=/usr --host=$LFS_TGT
 	make
 	make DESTDIR=$LFS install
@@ -204,7 +204,6 @@ case "$KVM_LFS_CONTINUE" in
 "6.15")
 	### 6.15. Tar-1.34
 	begin tar-1.34 tar.xz
-	cd tar-1.34
 	./configure --prefix=/usr \
 				--host=$LFS_TGT \
 				--build=$(build-aux/config.guess)
