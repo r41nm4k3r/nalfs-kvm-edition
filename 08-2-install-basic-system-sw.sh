@@ -444,6 +444,129 @@ esac
 	finish
 ;&
 
+"8.67")
+	### 8.67. Tar-1.34
+	begin tar-1.34 tar.xz
+	FORCE_UNSAFE_CONFIGURE=1  \
+	build
+	make -C doc install-html docdir=/usr/share/doc/tar-1.34
+	finish
+;&
+
+"8.68")
+	### 8.68. Texinfo-6.8
+	begin texinfo-6.8 tar.xz
+	build
+	make TEXMF=/usr/share/texmf install-tex
+	pushd /usr/share/info
+	  rm -v dir
+	  for f in *
+	    do install-info $f dir 2>/dev/null
+	  done
+	popd
+	finish
+;&
+
+"8.69")
+	### 8.69. Vim-9.0.0228 
+	begin vim-9.0.0228 tar.gz
+	echo '#define SYS_VIMRC_FILE "/etc/vimrc"' >> src/feature.h
+	./configure --prefix=/usr
+	make
+	chown -Rv tester .
+	su tester -c "LANG=en_US.UTF-8 make -j1 test" &> vim-test.log
+	make install
+	ln -sv vim /usr/bin/vi
+	or L in  /usr/share/man/{,*/}man1/vim.1; do
+	    ln -sv vim.1 $(dirname $L)/vi.1
+	done
+	ln -sv ../vim/vim90/doc /usr/share/doc/vim-9.0.0228
+	cat > /etc/vimrc << "EOF"
+	" Begin /etc/vimrc
+
+	" Ensure defaults are set before customizing settings, not after
+	source $VIMRUNTIME/defaults.vim
+	let skip_defaults_vim=1
+
+	set nocompatible
+	set backspace=2
+	set mouse=
+	syntax on
+	if (&term == "xterm") || (&term == "putty")
+	  set background=dark
+	endif
+
+	" End /etc/vimrc
+EOF
+	finish
+;&
+
+"8.70")
+	### 8.70. MarkupSafe-2.1.1 
+	begin MarkupSafe-2.1.1 tar.gz
+	pip3 wheel -w dist --no-build-isolation --no-deps $PWD
+	pip3 install --no-index --no-user --find-links dist Markupsafe
+	finish
+;&
+
+"8.71")
+	### 8.71. Jinja2-3.1.2  
+	begin Jinja2-3.1.2 tar.gz
+	pip3 wheel -w dist --no-build-isolation --no-deps $PWD
+	pip3 install --no-index --no-user --find-links dist Jinja2
+	finish
+;&
+
+"8.72")
+	### 8.72. Systemd-251
+	begin systemd-251 tar.gz
+	patch -Np1 -i ../systemd-251-glibc_2.36_fix-1.patch
+	sed -i -e 's/GROUP="render"/GROUP="video"/' \
+       -e 's/GROUP="sgx", //' rules.d/50-udev-default.rules.in
+	mkdir -p build
+	cd       build
+	meson --prefix=/usr                 \
+	      --buildtype=release           \
+	      -Ddefault-dnssec=no           \
+	      -Dfirstboot=false             \
+	      -Dinstall-tests=false         \
+	      -Dldconfig=false              \
+	      -Dsysusers=false              \
+	      -Drpmmacrosdir=no             \
+	      -Dhomed=false                 \
+	      -Duserdb=false                \
+	      -Dman=false                   \
+	      -Dmode=release                \
+	      -Dpamconfdir=no               \
+	      -Ddocdir=/usr/share/doc/systemd-251 \
+	      ..
+	ninja
+	ninja install
+	tar -xf ../../systemd-man-pages-251.tar.xz --strip-components=1 -C /usr/share/man
+	systemd-machine-id-setup
+	systemctl preset-all
+	systemctl disable systemd-sysupdate
+	finish
+;&
+
+"8.73")
+	### 8.73. D-Bus-1.14.0
+	begin dbus-1.14.0 tar.gz
+	./configure --prefix=/usr                        \
+            --sysconfdir=/etc                    \
+            --localstatedir=/var                 \
+            --runstatedir=/run                   \
+            --disable-static                     \
+            --disable-doxygen-docs               \
+            --disable-xml-docs                   \
+            --docdir=/usr/share/doc/dbus-1.14.0 \
+            --with-system-socket=/run/dbus/system_bus_socket
+	make
+	make install
+	ln -sfv /etc/machine-id /var/lib/dbus
+	finish
+;&
+
 "8.66")
 	### 8.66. Man-DB-2.10.1
 	begin man-db-2.10.1.tar.xz
@@ -463,147 +586,6 @@ esac
 	make install
 	cd ..
 	rm -rf man-db-2.10.1
-;&
-
-"8.67")
-	### 8.67. Tar-1.34
-	begin tar-1.34.tar.xz
-	cd tar-1.34
-	FORCE_UNSAFE_CONFIGURE=1 ./configure --prefix=/usr --bindir=/bin
-	make
-	make check || true # test capabilities: binary store/restore fail
-	make install
-	make -C doc install-html docdir=/usr/share/doc/tar-1.34
-	cd ..
-	rm -rf tar-1.34
-;&
-
-"8.68")
-	### 8.68. Texinfo-6.8
-	begin texinfo-6.8.tar.xz
-	cd texinfo-6.8
-	./configure --prefix=/usr --disable-static
-	make
-	make check
-	make install
-	make TEXMF=/usr/share/texmf install-tex
-	pushd /usr/share/info
-	rm -v dir
-	for f in * ; do
-		install-info $f dir 2>/dev/null
-	done
-	popd
-	cd ..
-	rm -rf texinfo-6.8
-;&
-
-"8.69")
-	### 8.69. Vim-8.2.4383
-	begin vim-8.2.4383.tar.gz
-	cd vim-8.2.4383
-	echo '#define SYS_VIMRC_FILE "/etc/vimrc"' >> src/feature.h
-	./configure --prefix=/usr
-	make
-	chown -Rv tester .
-	su tester -c "LANG=en_US.UTF-8 make -j1 test" &> vim-test.log || true
-	grep -F 'ALL DONE' vim-test.log || true
-	make install
-	ln -sv vim /usr/bin/vi
-	for L in /usr/share/man/{,*/}man1/vim.1; do
-		ln -sv vim.1 $(dirname $L)/vi.1
-	done
-	ln -sv ../vim/vim82/doc /usr/share/doc/vim-8.2.4383
-	cat > /etc/vimrc << "EOF"
-" Begin /etc/vimrc
-
-" Ensure defaults are set before customizing settings, not after
-source $VIMRUNTIME/defaults.vim
-let skip_defaults_vim=1
-
-set nocompatible
-set backspace=2
-set mouse=
-syntax on
-if (&term == "xterm") || (&term == "putty")
-set background=dark
-endif
-
-set spelllang=en
-set spell
-" End /etc/vimrc
-EOF
-	#vim -c ':options'
-	cd ..
-	rm -rf vim-8.2.4383
-;&
-
-"8.70")
-if [ "$KVM_LFS_INIT" == "sysvinit" ]; then
-	### 8.70. Eudev-3.2.9
-	begin eudev-3.2.9.tar.gz
-	cd eudev-3.2.9
-	./configure --prefix=/usr --bindir=/sbin --sbindir=/sbin --libdir=/usr/lib \
-		--sysconfdir=/etc --libexecdir=/lib --with-rootprefix= \
-		--with-rootlibdir=/lib --enable-manpages --disable-static
-	make
-	mkdir -pv /lib/udev/rules.d
-	mkdir -pv /etc/udev/rules.d
-	make check
-	make install
-	tar -xvf ../udev-lfs-20171102.tar.xz
-	make -f udev-lfs-20171102/Makefile.lfs install
-	udevadm hwdb --update
-	cd ..
-	rm -rf eudev-3.2.9
-elif [ "$KVM_LFS_INIT" == "systemd" ]; then
-	### 8.70. Systemd-250
-	begin systemd-250.tar.gz
-	cd systemd-250
-	ln -sf /bin/true /usr/bin/xsltproc
-	begin ../systemd-man-pages-250.tar.xz
-	sed '177,$ d' -i src/resolve/meson.build
-	sed -i 's/GROUP="render", //' rules.d/50-udev-default.rules.in
-	mkdir -p build
-	cd build
-	LANG=en_US.UTF-8 meson --prefix=/usr --sysconfdir=/etc \
-		--localstatedir=/var -Dblkid=true -Dbuildtype=release \
-		-Ddefault-dnssec=no -Dfirstboot=false -Dinstall-tests=false \
-		-Dkmod-path=/bin/kmod -Dldconfig=false -Dmount-path=/bin/mount \
-		-Drootprefix= -Drootlibdir=/lib -Dsplit-usr=true \
-		-Dsulogin-path=/sbin/sulogin -Dsysusers=false \
-		-Dumount-path=/bin/umount -Db_lto=false -Drpmmacrosdir=no \
-		-Dhomed=false -Duserdb=false -Dman=true \
-		-Ddocdir=/usr/share/doc/systemd-250 ..
-	LANG=en_US.UTF-8 ninja
-	LANG=en_US.UTF-8 ninja install
-	rm -f /usr/bin/xsltproc
-	systemd-machine-id-setup
-	systemctl preset-all
-	systemctl disable systemd-time-wait-sync.service
-	rm -f /usr/lib/sysctl.d/50-pid-max.conf
-	#TODO:
-	cp -v /usr/lib64/pkgconfig/libsystemd.pc /usr/lib/pkgconfig/
-	cd ../..
-	rm -rf systemd-250
-
-	### 8.71. D-Bus-1.12.20
-	begin dbus-1.12.20.tar.gz
-	cd dbus-1.12.20
-	./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var \
-		--disable-static --disable-doxygen-docs --disable-xml-docs \
-		--docdir=/usr/share/doc/dbus-1.12.20 \
-		--with-console-auth-dir=/run/console
-	make
-	make install
-	mv -v /usr/lib/libdbus-1.so.* /lib
-	ln -sfv ../../lib/$(readlink /usr/lib/libdbus-1.so) /usr/lib/libdbus-1.so
-	ln -sfv /etc/machine-id /var/lib/dbus
-	#TODO: install does not install dbus.socket ???
-	cp -v bus/dbus.socket /lib/systemd/system/
-	sed -i 's:/var/run:/run:' /lib/systemd/system/dbus.socket
-	cd ..
-	rm -rf dbus-1.12.20.tar.xz
-fi
 ;&
 
 "8.71")
