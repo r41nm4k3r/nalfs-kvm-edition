@@ -6,28 +6,8 @@ set -v
 cd /
 cd /sources
 
-if [ "$KVM_LFS_INIT" == "sysvinit" ]; then
-	tar -xf lfs-bootscripts-20200818.tar.xz
-	cd lfs-bootscripts-20200818
-	make install
-	bash /lib/udev/init-net-rules.sh
-	cat /etc/udev/rules.d/70-persistent-net.rules
-	cd ..
-	rm -rf lfs-bootscripts-20200818
-	udevadm test /sys/block/nbd0
-	cd /etc/sysconfig/
-	cat > ifconfig.eth0 << "EOF"
-ONBOOT=yes
-IFACE=ens3
-SERVICE=ipv4-static
-IP=192.168.122.12
-GATEWAY=192.168.122.1
-PREFIX=24
-BROADCAST=192.168.122.255
-EOF
-elif [ "$KVM_LFS_INIT" == "systemd" ]; then
-	mkdir -vp /etc/systemd/network
-	cat > /etc/systemd/network/10-eth-static.network << "EOF"
+mkdir -vp /etc/systemd/network
+cat > /etc/systemd/network/10-eth-static.network << "EOF"
 [Match]
 Name=ens0
 
@@ -36,7 +16,8 @@ Address=192.168.122.12
 Gateway=192.168.122.1
 Domains=lfs10
 EOF
-	cat > /etc/systemd/network/10-eth-dhcp.network << "EOF"
+
+cat > /etc/systemd/network/10-eth-dhcp.network << "EOF"
 [Match]
 Name=ens0
 
@@ -47,7 +28,7 @@ DHCP=ipv4
 UseDomains=true
 EOF
 	#ln -sfv /run/systemd/resolve/resolv.conf /etc/resolv.conf
-fi
+
 cat > /etc/resolv.conf << "EOF"
 # Begin /etc/resolv.conf
 
@@ -56,7 +37,9 @@ nameserver 1.0.0.1
 
 # End /etc/resolv.conf
 EOF
-echo "lfs10" > /etc/hostname
+
+echo "lfs11.2" > /etc/hostname
+
 cat > /etc/hosts << "EOF"
 # Begin /etc/hosts
 
@@ -69,60 +52,14 @@ ff02::2 ip6-allrouters
 
 # End /etc/hosts
 EOF
+
 mkdir -pv /etc/modprobe.d
 echo "blacklist forte" >> /etc/modprobe.d/blacklist.conf
-if [ "$KVM_LFS_INIT" == "sysvinit" ]; then
-	cat > /etc/inittab << "EOF"
-# Begin /etc/inittab
 
-id:3:initdefault:
-
-si::sysinit:/etc/rc.d/init.d/rc S
-
-l0:0:wait:/etc/rc.d/init.d/rc 0
-l1:S1:wait:/etc/rc.d/init.d/rc 1
-l2:2:wait:/etc/rc.d/init.d/rc 2
-l3:3:wait:/etc/rc.d/init.d/rc 3
-l4:4:wait:/etc/rc.d/init.d/rc 4
-l5:5:wait:/etc/rc.d/init.d/rc 5
-l6:6:wait:/etc/rc.d/init.d/rc 6
-
-ca:12345:ctrlaltdel:/sbin/shutdown -t1 -a -r now
-
-su:S016:once:/sbin/sulogin
-
-1:2345:respawn:/sbin/agetty --noclear tty1 9600
-2:2345:respawn:/sbin/agetty tty2 9600
-3:2345:respawn:/sbin/agetty tty3 9600
-4:2345:respawn:/sbin/agetty tty4 9600
-5:2345:respawn:/sbin/agetty tty5 9600
-6:2345:respawn:/sbin/agetty tty6 9600
-
-# End /etc/inittab
-EOF
-	cat > /etc/sysconfig/clock << "EOF"
-# Begin /etc/sysconfig/clock
-
-UTC=1
-
-# Set this to any options you might need to give to hwclock,
-# such as machine hardware clock type for Alphas.
-CLOCKPARAMS=
-
-# End /etc/sysconfig/clock
-EOF
-cat > /etc/profile << "EOF"
-# Begin /etc/profile
-
-export LANG=en_US.ISO-8859-1
-
-# End /etc/profile
-EOF
-elif [ "$KVM_LFS_INIT" = "systemd" ]; then
-	cat > /etc/locale.conf << "EOF"
+cat > /etc/locale.conf << "EOF"
 LANG=en_US.ISO-8859-1
 EOF
-fi
+
 cat > /etc/inputrc << "EOF"
 # Begin /etc/inputrc
 # Modified by Chris Lynn <roryo@roryo.dynup.net>
@@ -130,7 +67,7 @@ cat > /etc/inputrc << "EOF"
 # Allow the command prompt to wrap to the next line
 set horizontal-scroll-mode Off
 
-# Enable 8bit input
+# Enable 8-bit input
 set meta-flag On
 set input-meta On
 
@@ -166,6 +103,7 @@ set bell-style none
 
 # End /etc/inputrc
 EOF
+
 cat > /etc/shells << "EOF"
 # Begin /etc/shells
 
@@ -174,15 +112,15 @@ cat > /etc/shells << "EOF"
 
 # End /etc/shells
 EOF
-if [ "$KVM_LFS_INIT" == "systemd" ]; then
-	mkdir -pv /etc/systemd/coredump.conf.d
-	cat > /etc/systemd/coredump.conf.d/maxuse.conf << EOF
+
+mkdir -pv /etc/systemd/coredump.conf.d
+cat > /etc/systemd/coredump.conf.d/maxuse.conf << EOF
 [Coredump]
 MaxUse=5G
 EOF
 	#loginctl enable-linger
 	echo "KillUserProcesses=no" >> /etc/systemd/logind.conf
-fi
+
 cat > /etc/fstab << "EOF"
 # Begin /etc/fstab
 
@@ -192,23 +130,16 @@ cat > /etc/fstab << "EOF"
 /dev/vda1      /            ext4      defaults              1     1
 /dev/vda2      swap         swap      pri=1                 0     0
 EOF
-if [ "$KVM_LFS_INIT" == "sysvinit" ]; then
-	cat >> /etc/fstab << "EOF"
-proc           /proc        proc      nosuid,noexec,nodev   0     0
-sysfs          /sys         sysfs     nosuid,noexec,nodev   0     0
-devpts         /dev/pts     devpts    gid=5,mode=620        0     0
-tmpfs          /run         tmpfs     defaults              0     0
-devtmpfs       /dev         devtmpfs  mode=0755,nosuid      0     0
-EOF
-fi
+
 cat >> /etc/fstab << "EOF"
 
 # End /etc/fstab
 EOF
+
 cd /
 cd /sources
-tar -xf linux-5.16.9.tar.xz
-cd linux-5.16.9
+tar -xf linux-5.19.2.tar.xz
+cd linux-5.19.2
 make mrproper
 zcat /proc/config.gz > .config
 yes '' | make oldconfig
@@ -220,7 +151,7 @@ sed -e 's/.*\bCONFIG_VIRTIO_BLK\b.*/CONFIG_VIRTIO_BLK=y/' -i .config
 sed -e 's/.*\bCONFIG_SCSI_VIRTIO\b.*/CONFIG_SCSI_VIRTIO=y/' -i .config
 sed -e 's/.*\bCONFIG_VIRTIO_CONSOLE\b.*/CONFIG_VIRTIO_CONSOLE=y/' -i .config
 sed -e 's/.*\bCONFIG_VIRTIO_PCI\b.*/CONFIG_VIRTIO_PCI=y/' -i .config
-if [ "$KVM_LFS_INIT" == "systemd" ]; then
+
 	sed -e 's/.*\bCONFIG_CGROUPS\b.*/CONFIG_CGROUPS=y/' -i .config
 	sed -e 's/.*\bCONFIG_SYSFS_DEPRECATED\b.*/# CONFIG_SYSFS_DEPRECATED is not set (required by LFS)/' -i .config
 	sed -e 's/.*\bCONFIG_EXPERT\b.*/CONFIG_EXPERT=y/' -i .config
@@ -234,16 +165,15 @@ if [ "$KVM_LFS_INIT" == "systemd" ]; then
 	sed -e 's/.*\bCONFIG_AUTOFS_FS\b.*/CONFIG_AUTOFS_FS=y/' -i .config
 	sed -e 's/.*\bCONFIG_TMPFS_POSIX_ACL\b.*/CONFIG_TMPFS_POSIX_ACL=y/' -i .config
 	sed -e 's/.*\bCONFIG_TMPFS_XATTR\b.*/CONFIG_TMPFS_XATTR=y/' -i .config
-fi
 make kernelversion
 make kernelrelease
 make
 make modules_install
-cp -iv arch/x86_64/boot/bzImage /boot/vmlinuz-5.16.9-lfs-11.1-systemd
-cp -iv System.map /boot/System.map-5.16.9
-cp -iv .config /boot/config-5.16.9
-install -d /usr/share/doc/linux-5.16.9
-cp -r Documentation/* /usr/share/doc/linux-5.16.9
+cp -iv arch/x86/boot/bzImage /boot/vmlinuz-5.19.2-lfs-11.2-systemd
+cp -iv System.map /boot/System.map-5.19.2
+cp -iv .config /boot/config-5.19.2
+install -d /usr/share/doc/linux-5.19.2
+cp -r Documentation/* /usr/share/doc/linux-5.19.2
 chown -R 0:0 .
 install -v -m755 -d /etc/modprobe.d
 cat > /etc/modprobe.d/usb.conf << "EOF"
@@ -254,7 +184,9 @@ install uhci_hcd /sbin/modprobe ehci_hcd ; /sbin/modprobe -i uhci_hcd ; true
 
 # End /etc/modprobe.d/usb.conf
 EOF
+
 grub-install --target i386-pc --force /dev/nbd0
+
 cat > /boot/grub/grub.cfg << "EOF"
 # Begin /boot/grub/grub.cfg
 
@@ -264,8 +196,8 @@ set timeout=5
 insmod ext2
 set root=(hd0,gpt1)
 
-menuentry "GNU/Linux, Linux 5.16.9-lfs-11.1" {
-        linux   /boot/vmlinuz-5.16.9-lfs-11.1 loglevel=7 root=/dev/vda1 ro
+menuentry "GNU/Linux, Linux 5.19.2-lfs-11.2" {
+        linux   /boot/vmlinuz-5.19.2-lfs-11.2 loglevel=7 root=/dev/vda1 ro
 }
 EOF
 
