@@ -13,16 +13,20 @@ package_ext=""
 begin() {
 	package_name=$1
 	package_ext=$2
-
 	echo "[lfs-cross] Starting build of $package_name at $(date)"
-
 	tar xf $package_name.$package_ext
 	cd $package_name
 }
 
+build() {
+	./configure --prefix=/usr
+	make
+	make check
+	make install
+}
+
 finish() {
 	echo "[lfs-cross] Finishing build of $package_name at $(date)"
-
 	cd $LFS/sources
 	rm -rf $package_name
 }
@@ -151,10 +155,7 @@ case "$KVM_LFS_CONTINUE" in
 	### 8.43. Intltool-0.51.0
 	begin intltool-0.51.0 tar.gz
 	sed -i 's:\\\${:\\\$\\{:' intltool-update.in
-	./configure --prefix=/usr
-	make
-	make check
-	make install
+	build
 	install -v -Dm644 doc/I18N-HOWTO /usr/share/doc/intltool-0.51.0/I18N-HOWTO
 	finish
 ;&
@@ -162,10 +163,7 @@ case "$KVM_LFS_CONTINUE" in
 "8.44")
 	### 8.44. Autoconf-2.71
 	begin autoconf-2.71 tar.xz
-	./configure --prefix=/usr
-	make
-	make check || true
-	make install
+	build
 	finish
 ;&
 
@@ -324,8 +322,8 @@ EOF
 	finish
 ;&
 
-"8.53")
-	### 8.53. Check-0.15.2
+"8.55")
+	### 8.55. Check-0.15.2
 	begin check-0.15.2 tar.gz
 	./configure --prefix=/usr --disable-static
 	make
@@ -334,152 +332,116 @@ EOF
 	finish
 ;&
 
-"8.54")
-	### 8.54. Diffutils-3.8
-	begin diffutils-3.8.tar.xz
-	cd diffutils-3.8
-	./configure --prefix=/usr
-	make
-	make check
-	make install
-	cd ..
-	rm -rf diffutils-3.8
+"8.56")
+	### 8.56. Diffutils-3.8
+	begin diffutils-3.8 tar.xz
+	build
+	finish
 ;&
 
-"8.55")
-	### 8.55. Gawk-5.1.1
-	begin gawk-5.1.1.tar.xz
-	cd gawk-5.1.1
+"8.57")
+	### 8.57. Gawk-5.1.1
+	begin gawk-5.1.1 tar.xz
 	sed -i 's/extras//' Makefile.in
 	./configure --prefix=/usr
 	make
 	make check
 	make install
-	mkdir -v /usr/share/doc/gawk-5.1.1
-	cp -v doc/{awkforai.txt,*.{eps,pdf,jpg}} /usr/share/doc/gawk-5.1.1
-	cd ..
-	rm -rf gawk-5.1.1
+	mkdir -pv                                   /usr/share/doc/gawk-5.1.1
+	cp    -v doc/{awkforai.txt,*.{eps,pdf,jpg}} /usr/share/doc/gawk-5.1.1
+	finish
 ;&
 
-"8.56")
-	### 8.56. Findutils-4.9.0
-	begin findutils-4.9.0.tar.xz
-	cd findutils-4.9.0
-	./configure --prefix=/usr --localstatedir=/var/lib/locate
+"8.58")
+	### 8.58. Findutils-4.9.0
+	begin findutils-4.9.0 tar.xz
+	case $(uname -m) in
+    	i?86)   TIME_T_32_BIT_OK=yes ./configure --prefix=/usr --localstatedir=/var/lib/locate ;;
+    	x86_64) ./configure --prefix=/usr --localstatedir=/var/lib/locate ;;
+esac
 	make
 	chown -Rv tester .
 	su tester -c "PATH=$PATH make check"
 	make install
-	mv -v /usr/bin/find /bin
-	sed -i 's|find:={BINDIR}|find:=/bin|' /usr/bin/updatedb
-	cd ..
-	rm -rf findutils-4.9.0
+	finish
 ;&
 
-"8.57")
-	### 8.57. Groff-1.22.4
-	begin groff-1.22.4.tar.gz
-	cd groff-1.22.4
-	echo A4 > /etc/papersize
-	PAGE=A4 ./configure --prefix=/usr
+"8.59")
+	### 8.59. Groff-1.22.4
+	begin groff-1.22.4 tar.gz
+	PAGE=<paper_size> ./configure --prefix=/usr
 	make -j1
 	make install
-	cd ..
-	rm -rf groff-1.22.4
+	finish
 ;&
 
-"8.58")
-	### 8.58. GRUB-2.06
-	begin grub-2.06.tar.xz
-	cd grub-2.06
-	./configure --prefix=/usr --sbindir=/sbin --sysconfdir=/etc --disable-efiemu \
-		--disable-werror
+"8.60")
+	### 8.60. GRUB-2.06
+	begin grub-2.06 tar.xz
+	./configure --prefix=/usr          \
+            --sysconfdir=/etc      \
+            --disable-efiemu       \
+            --disable-werror
 	make
 	make install
 	mv -v /etc/bash_completion.d/grub /usr/share/bash-completion/completions
-	cd ..
-	rm -rf grub-2.06
+	finish
 ;&
 
-
-"8.60")
-	### 8.60. Gzip-1.11
-	begin gzip-1.11.tar.xz
-	cd gzip-1.11
-	./configure --prefix=/usr
-	make
-	make check
-	make install
-	mv -v /usr/bin/gzip /bin
-	cd ..
-	rm -rf gzip-1.11
-;&
 
 "8.61")
-	### 8.61. IPRoute2-5.16.0
-	begin iproute2-5.16.0.tar.xz
-	cd iproute2-5.16.0
-	sed -i /ARPD/d Makefile
-	rm -fv man/man8/arpd.8
-	sed -i 's/.m_ipt.o//' tc/Makefile
-	make
-	make DOCDIR=/usr/share/doc/iproute2-5.16.0 install
-	cd ..
-	rm -rf iproute2-5.16.0
+	### 8.61. Gzip-1.12
+	begin gzip-1.12 tar.xz
+	build
+	finish
 ;&
 
 "8.62")
-	### 8.62. Kbd-2.4.0
-	begin kbd-2.4.0.tar.xz
-	cd kbd-2.4.0
-	patch -Np1 -i ../kbd-2.4.0-backspace-1.patch
+	### 8.62. IPRoute2-5.19.0
+	begin iproute2-5.19.0 tar.xz
+	sed -i /ARPD/d Makefile
+	rm -fv man/man8/arpd.8
+	make NETNS_RUN_DIR=/run/netns
+	make SBINDIR=/usr/sbin install
+	mkdir -pv             /usr/share/doc/iproute2-5.19.0
+	cp -v COPYING README* /usr/share/doc/iproute2-5.19.0
+	finish
+;&
+
+"8.63")
+	### 8.63. Kbd-2.5.1
+	begin kbd-2.4.0 tar.xz
+	patch -Np1 -i ../kbd-2.5.1-backspace-1.patch
 	sed -i '/RESIZECONS_PROGS=/s/yes/no/' configure
 	sed -i 's/resizecons.8 //' docs/man/man8/Makefile.in
 	./configure --prefix=/usr --disable-vlock
 	make
 	make check
 	make install
-	rm -v /usr/lib/libtswrap.{a,la,so*}
-	mkdir -v /usr/share/doc/kbd-2.4.0
-	cp -R -v docs/doc/* /usr/share/doc/kbd-2.4.0
-	cd ..
-	rm -rf kbd-2.4.0
-;&
-
-"8.63")
-	### 8.63. Libpipeline-1.5.5
-	begin libpipeline-1.5.5.tar.gz
-	cd libpipeline-1.5.5
-	./configure --prefix=/usr
-	make
-	make check
-	make install
-	cd ..
-	rm -rf libpipeline-1.5.5
+	mkdir -pv           /usr/share/doc/kbd-2.5.1
+	cp -R -v docs/doc/* /usr/share/doc/kbd-2.5.1
+	finish
 ;&
 
 "8.64")
-	### 8.64. Make-4.3
-	begin make-4.3.tar.gz
-	cd make-4.3
-	./configure --prefix=/usr
-	make
-	make check
-	make install
-	cd ..
-	rm -rf make-4.3
+	### 8.64. Libpipeline-1.5.6
+	begin libpipeline-1.5.6 tar.gz
+	build
+	finish
 ;&
 
 "8.65")
-	### 8.65. Patch-2.7.6
-	begin patch-2.7.6.tar.xz
-	cd patch-2.7.6
-	./configure --prefix=/usr
-	make
-	make check
-	make install
-	cd ..
-	rm -rf patch-2.7.6
+	### 8.65. Make-4.3
+	begin make-4.3 tar.gz
+	build
+	finish
+;&
+
+"8.66")
+	### 8.66. Patch-2.7.6
+	begin patch-2.7.6 tar.xz
+	build
+	finish
 ;&
 
 "8.66")
